@@ -1,0 +1,8 @@
+[MASTER]
+init-hook='import sys; sys.path.append("./app")'
+[REPORTS]
+output-format=json
+[MESSAGES CONTROL]
+# IMPORTANT: remove this exclusion in the future 
+# for implement dynamic documenation generation like Sphinx
+disable=C0114,C0115,C0116

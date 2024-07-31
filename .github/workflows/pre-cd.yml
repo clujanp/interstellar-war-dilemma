@@ -1,0 +1,106 @@
+name: Pre CD Pipeline
+
+on: 
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ vars.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      env:
+        REQUIREMENTS_DEV: ${{ vars.REQUIREMENTS_DEV}}
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r ${REQUIREMENTS_DEV}
+        pip install pytest pytest-cov coverage pylint
+        
+    - name: Linter with pylint
+      env:
+        SRC_FOLDER: ${{ vars.SRC_FOLDER }}
+        TEST_FOLDER: ${{ vars.TESTS_FOLDER }}
+        PYLINT_SCORE: ${{ vars.PYLINT_SCORE }}
+      run: |
+        pylint ${SRC_FOLDER}/ ${TEST_FOLDER}/ --fail-under=${PYLINT_SCORE} --output-format=text > pylint_report.txt
+
+    - name: Upload linter report
+      uses: actions/upload-artifact@v3
+      with:
+        name: pylint-report
+        path: pylint_report.txt
+
+  terraform-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Terraform Init in Staging
+        if: github.base_ref == 'staging'
+        working-directory: terraform
+        run: |  
+          terraform init \
+          -backend-config="access_key=${{ secrets.STAGING_TF_BACKEND_ACCESS_KEY }}" \
+          -backend-config="secret_key=${{ secrets.STAGING_TF_BACKEND_SECRET_KEY }}" \
+          -backend-config="bucket=${{ vars.STAGING_TF_STATE_BUCKET }}" \
+          -backend-config="key=${{ vars.STAGING_TF_STATE_KEY }}" \
+          -backend-config="region=${{ vars.STAGING_TF_BACKEND_AWS_REGION }}"
+
+      - name: Terraform Init in Production
+        if: github.base_ref == 'main'
+        working-directory: terraform
+        run: |  
+          terraform init \
+          -backend-config="access_key=${{ secrets.PRODUCTION_TF_BACKEND_ACCESS_KEY }}" \
+          -backend-config="secret_key=${{ secrets.PRODUCTION_TF_BACKEND_SECRET_KEY }}" \
+          -backend-config="bucket=${{ vars.PRODUCTION_TF_STATE_BUCKET }}" \
+          -backend-config="key=${{ vars.PRODUCTION_TF_STATE_KEY }}" \
+          -backend-config="region=${{ vars.PRODUCTION_TF_BACKEND_AWS_REGION }}"
+
+      - name: Create dummy required files
+        working-directory: terraform
+        run: |
+          touch lambda_function.zip
+          touch dependencies.zip
+
+      - name: Terraform Plan in Staging
+        if: github.base_ref == 'staging'
+        working-directory: terraform
+        run: |
+          pwd
+          ls -la
+          terraform plan -var-file="${ENV}.tfvars" -var="aws_account_id=${AWS_ACCOUNT_ID}"
+        env:
+          ENV: staging
+          AWS_ACCOUNT_ID: ${{ secrets.STAGING_AWS_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Terraform Plan in Production
+        if: github.base_ref == 'main'
+        working-directory: terraform
+        run: |
+          pwd
+          ls -la
+          terraform plan -var-file="${ENV}.tfvars" -var="aws_account_id=${AWS_ACCOUNT_ID}"
+        env:
+          ENV: production
+          AWS_ACCOUNT_ID: ${{ secrets.PRODUCTION_AWS_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}

@@ -1,0 +1,31 @@
+name: CI Pipeline
+
+on: [push]
+
+jobs:
+  continuous-integration:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ vars.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      env:
+        REQUIREMENTS_DEV: ${{ vars.REQUIREMENTS_DEV}}
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r ${REQUIREMENTS_DEV}
+        pip install pytest pytest-cov coverage pylint
+        
+    - name: Unitary tests
+      env:
+        SRC_FOLDER: ${{ vars.SRC_FOLDER }}
+        TESTS_FOLDER: ${{ vars.TESTS_FOLDER }}
+        COV_PERCENT: ${{ vars.COV_PERCENT }}
+      run: |
+        pytest --tb=short --cov=${SRC_FOLDER}/ ${TESTS_FOLDER}/ --cov-fail-under=${COV_PERCENT}

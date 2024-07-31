@@ -1,0 +1,17 @@
+{
+    "workbench.colorCustomizations": {
+        "statusBar.background": "#ff2a2a",
+        "statusBar.foreground": "#1a1a1a",
+        "statusBar.debuggingBackground": "#7c0072",
+        "statusBar.debuggingForeground": "#dedede",
+        "statusBarItem.remoteBackground": "#1a1a1a",
+        "statusBarItem.remoteForeground": "#ff2a2a"
+    },
+    "editor.rulers": [
+        72,
+        79
+    ],
+    "github-actions.workflows.pinned.workflows": [
+        ".github/workflows/cd.yml"
+    ]
+}
