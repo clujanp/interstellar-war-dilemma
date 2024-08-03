@@ -1,21 +1,6 @@
-from pydantic import field_validator
 from collections import OrderedDict
+from functools import lru_cache, wraps
 from typing import Union, Tuple
-
-
-def model_validator(*fileds, each_item: bool = False, **kwargs) -> callable:
-    def decorator(func) -> callable:
-        def wrapper(cls, v: any) -> any:
-            # iterate over list case
-            if each_item and isinstance(v, list):
-                for item in v:
-                    func(cls, item)
-                return v
-            # normal case
-            func(cls, v)
-            return v
-        return field_validator(*fileds, **kwargs)(wrapper)
-    return decorator
 
 
 def caster(type: Union[type, Tuple[type]]) -> callable:
@@ -37,3 +22,16 @@ def caster(type: Union[type, Tuple[type]]) -> callable:
             return obj
         return caster_handler
     return decorator
+
+
+def cached(func):
+    @lru_cache(maxsize=None)
+    def cached_method(self, *args, **kwargs):
+        return func(self, *args, **kwargs)
+
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        return cached_method(self, *args, **kwargs)
+
+    wrapper.cache_clear = cached_method.cache_clear
+    return wrapper
