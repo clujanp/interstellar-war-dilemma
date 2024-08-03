@@ -118,7 +118,7 @@ integration() {
 test() {
     venv_activate
     if [ -n "$@" ]; then
-        pytest -vv --tb=short --cov=$SRC_FOLDER/ $TESTS_FOLDER/ "$@"
+        pytest -vv --tb=short $SRC_FOLDER/ $TESTS_FOLDER/ "$@"
     else
         pytest -vv --tb=short --cov=$SRC_FOLDER/ $TESTS_FOLDER/ --cov-fail-under=$COV_PERCENT
     fi
@@ -129,7 +129,7 @@ test_log() {
     clear
     venv_activate
     if [ -n "$@" ]; then
-        pytest -o log_cli=true -vv --tb=short --cov=$SRC_FOLDER/ $TESTS_FOLDER/ "$@"
+        pytest -o log_cli=true -vv --tb=short $TESTS_FOLDER/ "$@"
     else
         pytest -o log_cli=true -vv --tb=short --cov=$SRC_FOLDER/ $TESTS_FOLDER/ --cov-fail-under=$COV_PERCENT
     fi
