@@ -83,7 +83,9 @@ class Memories(BaseModel, MemoriesValidations):
     def skirmishes(self) -> Dict[Civilization, List[Tuple[bool, Score]]]:
         civilizations = defaultdict(list)
         for skirmish in self.memories_:
-            for civilization in skirmish._winner:
+            for civilization in (
+                skirmish.civilization_1, skirmish.civilization_2
+            ):
                 if civilization == self.owner:
                     continue
                 civilizations[civilization].append(

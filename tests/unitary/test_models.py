@@ -107,17 +107,27 @@ class TestModelMemories(TestCase):
             name="TestCiv1", strategy=MagicMock(), resources=10)
         self.civilization_2 = Civilization(
             name="TestCiv2", strategy=MagicMock(), resources=10)
+        self.civilization_3 = Civilization(
+            name="TestCiv3", strategy=MagicMock(), resources=10)
         self.memories = Memories(owner=self.civilization_1)
         self.tie_good = (Position.COOPERATION, Score.TIE_GOOD,)
         self.tie_bad = (Position.AGGRESSION, Score.TIE_BAD,)
+        self.lose = (Position.AGGRESSION, Score.LOSE,)
         self.skirmishes = [
             MagicMock(
-                _winner=[self.civilization_1, self.civilization_2],
+                civilization_1=self.civilization_1,
+                civilization_2=self.civilization_2,
                 behavior=MagicMock(return_value=self.tie_good),
             ),
             MagicMock(
-                _winner=[self.civilization_2],
+                civilization_1=self.civilization_1,
+                civilization_2=self.civilization_2,
                 behavior=MagicMock(return_value=self.tie_bad),
+            ),
+            MagicMock(
+                civilization_1=self.civilization_1,
+                civilization_2=self.civilization_3,
+                behavior=MagicMock(return_value=self.lose),
             ),
         ]
 
@@ -136,8 +146,9 @@ class TestModelMemories(TestCase):
         self.memories.owner = None
         self.memories.memories_ = self.skirmishes
         expected = {
-            self.civilization_1: [self.tie_good],
+            self.civilization_1: [self.tie_good, self.tie_bad, self.lose],
             self.civilization_2: [self.tie_good, self.tie_bad],
+            self.civilization_3: [self.lose],
         }
         response = self.memories.skirmishes()
         assert expected == response
@@ -146,6 +157,7 @@ class TestModelMemories(TestCase):
         self.memories.memories_ = self.skirmishes
         expected = {
             self.civilization_2: [self.tie_good, self.tie_bad],
+            self.civilization_3: [self.lose],
         }
         response = self.memories.skirmishes()
         assert expected == response
