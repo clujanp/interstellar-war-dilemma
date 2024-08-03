@@ -2,7 +2,7 @@ import init  # noqa: F401
 from unittest import TestCase
 from os import environ
 from time import sleep
-from infraestructure.logging import logger, DEBUG
+from app.infraestructure.logging import logger, DEBUG
 
 
 class TestInfraestructureLoggingCustomLogger(TestCase):

@@ -2,7 +2,7 @@ import init  # noqa: F401
 from unittest import TestCase
 from unittest.mock import MagicMock
 from collections import OrderedDict
-from utils.decorators import caster
+from app.utils.decorators import caster
 
 
 class TestUtilsDecoratorsCaster(TestCase):

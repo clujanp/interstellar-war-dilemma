@@ -1,7 +1,6 @@
 import init  # noqa: F401
 from unittest import TestCase
-from utils.functions import (
-    replace_decimals, replace_to_decimal, cast_datetime_to_isoformat)
+from app.utils.functions import (
 from decimal import Decimal
 from datetime import datetime
 

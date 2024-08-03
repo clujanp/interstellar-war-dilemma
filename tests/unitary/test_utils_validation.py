@@ -1,7 +1,7 @@
 import init  # noqa: F401
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
-from utils.validation import (
+from app.utils.validation import (
     validate_not_empty_or_whitespaces,
     validate_max_length,
     validate_min_length,
@@ -82,7 +82,7 @@ class TestsUtilsValidation(TestCase):
             validate_not_future(datetime(2022, 12, 31, 11, 59, 59), self.msg)
             # No exception means success
 
-    @patch('utils.validation.datetime')
+    @patch('app.utils.validation.datetime')
     def test_validate_not_future_fail(self, mock_datetime: MagicMock):
         mock_datetime.now.return_value = datetime(2023, 1, 1, 12, 0, 0)
         with self.assertRaises(AssertionError):
