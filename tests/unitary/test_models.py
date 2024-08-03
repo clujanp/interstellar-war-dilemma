@@ -150,6 +150,25 @@ class TestModelMemories(TestCase):
         response = self.memories.skirmishes()
         assert expected == response
 
+    def test_civilizations(self):
+        self.memories.owner = None
+        self.memories.memories_ = self.skirmishes
+        response = self.memories.civilizations
+        assert all([
+            civilization in [
+                self.civilization_1, self.civilization_2, self.civilization_3]
+            for civilization in response
+        ])
+
+    def test_civilizations_without_memories_owner(self):
+        self.memories.owner = self.civilization_1
+        self.memories.memories_ = self.skirmishes
+        response = self.memories.civilizations
+        assert all([
+            civilization in [self.civilization_2, self.civilization_3]
+            for civilization in response
+        ])
+
     def test_str_success(self):
         assert "TestCiv1's Memories of 0 skirmishes" == str(self.memories)
 

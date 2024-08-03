@@ -69,6 +69,16 @@ class Memories(BaseModel, MemoriesValidations):
         self.memories_.append(skirmish)
         self.skirmishes.cache_clear()
 
+    @property
+    def civilizations(self) -> List[Civilization]:
+        return list(set([
+            civilization
+            for skirmish in self.memories_
+            for civilization in (
+                skirmish.civilization_1, skirmish.civilization_2)
+            if civilization != self.owner
+        ]))
+
     @cached
     def skirmishes(self) -> Dict[Civilization, List[Tuple[bool, Score]]]:
         civilizations = defaultdict(list)
