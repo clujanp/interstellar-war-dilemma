@@ -71,3 +71,10 @@ class TestStatistic(TestCase):
     def test_statistic_percent(self):
         stat = Statistic(50, 100)
         assert stat.percent == 0.5  # NOSONAR: S1244
+
+    def test_statistic_invert(self):
+        stat = Statistic(50, 100)
+        invert = stat.invert()
+        assert invert == 50
+        assert invert.total == 100
+        assert invert.percent == 0.5  # NOSONAR: S1244

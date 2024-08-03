@@ -37,6 +37,9 @@ class Statistic(int):
         value.total = total
         return value
 
+    def invert(self) -> 'Statistic':
+        return Statistic(self.total - self, self.total)
+
     @property
     def percent(self) -> float:
         return self / 100
