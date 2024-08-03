@@ -1,15 +1,8 @@
-# python-template
-Template for Python repos
+# spacial-war
+Game multiplayer with python based in prissioner dilemma
 
 ## Config repository
 ### set repository variables
-  - PYTHON_VERSION
-  - SRC_FOLDER
-  - TESTS_FOLDER
-  - COV_PERCENT
-  - PYLINT_SCORE
-  - REQUIREMENTS_DEV
-  - REQUIREMENTS_PROD
   - STAGING_TF_BACKEND_AWS_REGION
   - STAGING_TF_STATE_BUCKET
   - STAGING_TF_STATE_KEY
