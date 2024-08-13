@@ -44,13 +44,19 @@ class CivilizationService:
                 planet=test_planet,
                 opponent=test_opponent,
             ) in [True, False]
+        # TODO: improve error notification eg: share lineno
         except TypeError as err:
+            logger.error('-' * 80)
             logger.error(err, exc_info=True)
+            logger.error('-' * 80)
             return False
         except Exception as err:
+            logger.error('-' * 80)
             logger.error(err, exc_info=True)
+            logger.error('-' * 80)
             return False
         finally:
+            # TODO: add to unit tests
             del test_planet
             del test_self
             del test_opponent
