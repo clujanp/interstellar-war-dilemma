@@ -12,6 +12,7 @@ TESTS_FOLDER="tests/unitary"
 TEST_INTEGRATION_MODULE=tests.integration.main
 REQUIREMENTS_PROD="config/requirements/production.txt"
 REQUIREMENTS_DEV="config/requirements/development.txt"
+ENTRY_POINT="app/main.py"
 COV_PERCENT="80"
 PYLINT_SCORE=8.0
 
@@ -57,6 +58,12 @@ install_dependencies() {
     venv_activate
     pip install "$@"
     update_dependencies
+}
+
+run() {
+    venv_activate
+    export PYTHONPATH=$(pwd)
+    python $ENTRY_POINT
 }
 
 # Set requirements by enviroment
@@ -199,7 +206,7 @@ help() {
     echo ""
     echo "  actions:"
     echo "  -- common actions --"
-    echo "    docker [-build]                           Run Docker compose"
+    echo "    run                                       Run application"
     echo "    test                                      Run suite tests"
     echo "  -- unitests --"
     echo "    tests                                     Run all tests unitary and integration"
@@ -234,6 +241,10 @@ case "$1" in
     i)
         set_env "${2:---env:dev}"
         install_all
+        ;;
+    run)
+        set_env "${2:---env:dev}"
+        run
         ;;
     venv)
         case "$2" in
