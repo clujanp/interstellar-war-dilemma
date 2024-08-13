@@ -22,40 +22,53 @@ class TestPosition(TestCase):
 
 class TestResult(TestCase):
     def setUp(self):
-        self.posture_cooperation = Position.COOPERATION
-        self.posture_aggression = Position.AGGRESSION
+        self.positions = [Position.COOPERATION, Position.AGGRESSION]
+        self.scores = [Score.LOSE, Score.TIE_BAD, Score.TIE_GOOD, Score.WIN]
 
-    def test_was_cooperative_success(self):
-        result = Result.was_cooperative(self.posture_cooperation, Score.WIN)
-        assert result is True
+    def test_was_cooperative(self):
+        for posture in self.positions:
+            for score in self.scores:
+                result = Result.was_cooperative(posture, score)
+                if posture is Position.COOPERATION:
+                    assert result is True
+                else:
+                    assert result is False
 
-    def test_was_cooperative_fail(self):
-        result = Result.was_cooperative(self.posture_aggression, Score.WIN)
-        assert result is False
+    def test_is_conquest(self):
+        for posture in self.positions:
+            for score in self.scores:
+                result = Result.is_conquest(posture, score)
+                if score in [Score.WIN]:
+                    assert result is True
+                else:
+                    assert result is False
 
-    def test_is_conquest_success(self):
-        result = Result.is_conquest(self.posture_cooperation, Score.WIN)
-        assert result is True
+    def test_is_hit(self):
+        for posture in self.positions:
+            for score in self.scores:
+                result = Result.is_hit(posture, score)
+                if score in [Score.WIN, Score.TIE_GOOD]:
+                    assert result is True
+                else:
+                    assert result is False
 
-    def test_is_conquest_fail(self):
-        result = Result.is_conquest(self.posture_cooperation, Score.LOSE)
-        assert result is False
+    def test_is_lose(self):
+        for posture in self.positions:
+            for score in self.scores:
+                result = Result.is_lose(posture, score)
+                if score in [Score.LOSE, Score.TIE_BAD]:
+                    assert result is True
+                else:
+                    assert result is False
 
-    def test_is_hit_success(self):
-        result = Result.is_hit(self.posture_cooperation, Score.TIE_BAD)
-        assert result is True
-
-    def test_is_hit_fail(self):
-        result = Result.is_hit(self.posture_cooperation, Score.LOSE)
-        assert result is False
-
-    def test_is_mistake_success(self):
-        result = Result.is_mistake(self.posture_cooperation, Score.LOSE)
-        assert result is True
-
-    def test_is_mistake_fail(self):
-        result = Result.is_mistake(self.posture_cooperation, Score.WIN)
-        assert result is False
+    def test_is_mistake(self):
+        for posture in self.positions:
+            for score in self.scores:
+                result = Result.is_mistake(posture, score)
+                if score in [Score.LOSE]:
+                    assert result is True
+                else:
+                    assert result is False
 
 
 class TestStatistic(TestCase):
@@ -69,8 +82,8 @@ class TestStatistic(TestCase):
             Statistic(-1, 100)
 
     def test_statistic_percent(self):
-        stat = Statistic(50, 100)
-        assert stat.percent == 0.5  # NOSONAR: S1244
+        assert Statistic(50, 100).percent == 0.5  # NOSONAR: S1244
+        assert Statistic(2, 20).percent == 0.1  # NOSONAR: S1244
 
     def test_statistic_invert(self):
         stat = Statistic(50, 100)
