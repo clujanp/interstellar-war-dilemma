@@ -150,7 +150,7 @@ class TestModelMemories(TestCase):
             self.civilization_2: [self.tie_good, self.tie_bad],
             self.civilization_3: [self.lose],
         }
-        response = self.memories.skirmishes()
+        response = self.memories.skirmishes_by_civilization()
         assert expected == response
 
     def test_skirmishes_with_owner(self):
@@ -159,7 +159,7 @@ class TestModelMemories(TestCase):
             self.civilization_2: [self.tie_good, self.tie_bad],
             self.civilization_3: [self.lose],
         }
-        response = self.memories.skirmishes()
+        response = self.memories.skirmishes_by_civilization()
         assert expected == response
 
     def test_civilizations(self):

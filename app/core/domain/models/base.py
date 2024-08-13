@@ -2,7 +2,7 @@ from pydantic import BaseModel as BM, Field, ConfigDict
 from uuid import uuid4, UUID
 
 
-class BaseModel(BM):
+class Entity(BM):
     uid: UUID = Field(default_factory=lambda: uuid4())
 
     model_config = ConfigDict(

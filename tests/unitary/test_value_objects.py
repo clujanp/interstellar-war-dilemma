@@ -1,7 +1,7 @@
 import init  # noqa: F401
 from unittest import TestCase
 from app.core.domain.models.value_objects import (
-    Score, Position, Eval, Statistic)
+    Score, Position, Result, Statistic)
 
 
 class TestScore(TestCase):
@@ -20,41 +20,41 @@ class TestPosition(TestCase):
         assert Position.AGGRESSION is False
 
 
-class TestEval(TestCase):
+class TestResult(TestCase):
     def setUp(self):
         self.posture_cooperation = Position.COOPERATION
         self.posture_aggression = Position.AGGRESSION
 
     def test_was_cooperative_success(self):
-        result = Eval.was_cooperative(self.posture_cooperation, Score.WIN)
+        result = Result.was_cooperative(self.posture_cooperation, Score.WIN)
         assert result is True
 
     def test_was_cooperative_fail(self):
-        result = Eval.was_cooperative(self.posture_aggression, Score.WIN)
+        result = Result.was_cooperative(self.posture_aggression, Score.WIN)
         assert result is False
 
     def test_is_conquest_success(self):
-        result = Eval.is_conquest(self.posture_cooperation, Score.WIN)
+        result = Result.is_conquest(self.posture_cooperation, Score.WIN)
         assert result is True
 
     def test_is_conquest_fail(self):
-        result = Eval.is_conquest(self.posture_cooperation, Score.LOSE)
+        result = Result.is_conquest(self.posture_cooperation, Score.LOSE)
         assert result is False
 
     def test_is_hit_success(self):
-        result = Eval.is_hit(self.posture_cooperation, Score.TIE_BAD)
+        result = Result.is_hit(self.posture_cooperation, Score.TIE_BAD)
         assert result is True
 
     def test_is_hit_fail(self):
-        result = Eval.is_hit(self.posture_cooperation, Score.LOSE)
+        result = Result.is_hit(self.posture_cooperation, Score.LOSE)
         assert result is False
 
     def test_is_mistake_success(self):
-        result = Eval.is_mistake(self.posture_cooperation, Score.LOSE)
+        result = Result.is_mistake(self.posture_cooperation, Score.LOSE)
         assert result is True
 
     def test_is_mistake_fail(self):
-        result = Eval.is_mistake(self.posture_cooperation, Score.WIN)
+        result = Result.is_mistake(self.posture_cooperation, Score.WIN)
         assert result is False
 
 

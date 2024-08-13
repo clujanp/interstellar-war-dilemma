@@ -7,6 +7,7 @@ class Score(int):
     COST_MEDIUM = 2
     COST_LOW = 1
     COST_NONE = 0
+    MAX_SCORE = 6
 
     def __new__(cls, value: int):
         assert value in (cls.LOSE, cls.TIE_BAD, cls.TIE_GOOD, cls.WIN,), (
@@ -21,12 +22,18 @@ class Position:
     AGGRESSION = False
 
 
-class Eval:
+class Result:
+    COOPERATION = 1
+    CONQUEST = 0
+    AGGRESSION = -1
+
     was_cooperative = (  # noqa: E731
         lambda posture, score: posture is Position.COOPERATION)
     is_conquest = lambda posture, score: score == Score.WIN  # noqa: E731
     is_hit = (  # noqa: E731
-        lambda posture, score: score in [Score.TIE_BAD, Score.TIE_GOOD])
+        lambda posture, score: score in [Score.WIN, Score.TIE_GOOD])
+    is_lose = (  # noqa: E731
+        lambda posture, score: score in [Score.LOSE, Score.TIE_BAD])
     is_mistake = lambda posture, score: score == Score.LOSE  # noqa: E731
 
 
@@ -42,4 +49,6 @@ class Statistic(int):
 
     @property
     def percent(self) -> float:
-        return self / 100
+        if self.total == 0:
+            return 0.0
+        return self / self.total

@@ -1,18 +1,18 @@
 import init  # noqa: F401
 from unittest import TestCase
 from uuid import UUID
-from app.core.domain.models.base import BaseModel
+from app.core.domain.models.base import Entity
 
 
 class TestBaseModel(TestCase):
     def setUp(self):
-        self.instance = BaseModel()
+        self.instance = Entity()
 
     def test_uid_is_uuid_success(self):
         assert isinstance(self.instance.uid, UUID)
 
     def test_uid_is_unique_success(self):
-        instance2 = BaseModel()
+        instance2 = Entity()
         assert self.instance.uid != instance2.uid
 
     def test_hash_function_success(self):
@@ -26,4 +26,4 @@ class TestBaseModel(TestCase):
         assert repr(self.instance) == expected_repr
 
     def test_model_config_success(self):
-        assert isinstance(BaseModel.model_config, dict)
+        assert isinstance(Entity.model_config, dict)

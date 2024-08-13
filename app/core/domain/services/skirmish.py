@@ -16,6 +16,10 @@ class SkirmishService:
             civilization_2=civilization_2,
         )
 
+    @staticmethod
+    def results(skirmish: Skirmish) -> Tuple[List[Civilization], Score, Score]:
+        return skirmish.winner_, skirmish.score_1, skirmish.score_2
+
     @classmethod
     def resolve(
         cls, skirmish: Skirmish
@@ -28,9 +32,9 @@ class SkirmishService:
         civilization_2 = skirmish.civilization_2
 
         skirmish.posture_1 = civilization_1.strategy(
-            planet=planet, opponent=civilization_2)
+            self=civilization_1, planet=planet, opponent=civilization_2)
         skirmish.posture_2 = civilization_2.strategy(
-            planet=planet, opponent=civilization_1)
+            self=civilization_2, planet=planet, opponent=civilization_1)
 
         if all([skirmish.posture_1, skirmish.posture_2]):
             return cls._decide_winner(skirmish, Score.TIE_GOOD, Score.TIE_GOOD)

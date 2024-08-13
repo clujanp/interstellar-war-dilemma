@@ -1,10 +1,12 @@
 import init  # noqa: F401
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, ANY
+from unittest.mock import MagicMock, patch, ANY, call
 from app.core.domain.models import (
-    Civilization, Planet, Score, Position, Eval)
+    Civilization, Planet, Score, Position, Result)
 from app.core.domain.services import (
-    PlanetService, CivilizationService, SkirmishService, MemoriesService)
+    PlanetService, CivilizationService, SkirmishService,
+    MemoriesServiceWrapper
+)
 
 
 class TestPlanetService(TestCase):
@@ -37,6 +39,8 @@ class TestPlanetService(TestCase):
 class TestCivilizationService(TestCase):
     def setUp(self):
         self.strategy = MagicMock(return_value=True)
+        self.civ1 = MagicMock(name="Self")
+        self.civ2 = MagicMock(name="TestOpponent")
 
     def test_create_civilization_success(self):
         civilization = CivilizationService.create(
@@ -57,14 +61,18 @@ class TestCivilizationService(TestCase):
         mock_planet_create: MagicMock,
         mock_logger_error: MagicMock,
     ):
+        mock_civilization.side_effect = [self.civ1, self.civ2]
         assert CivilizationService.validate_strategy(self.strategy) is True
         mock_planet_create.assert_called_once_with(
             name="TestPlanet", cost=Score.COST_HIGH)
-        mock_civilization.assert_called_once_with(
-            name="TestOpponent", strategy=ANY, resources=0)
+        assert mock_civilization.call_args_list == [
+            call(name="Self", strategy=ANY, resources=0),
+            call(name="TestOpponent", strategy=ANY, resources=0),
+        ]
         self.strategy.assert_called_once_with(
+            self=self.civ1,
             planet=mock_planet_create.return_value,
-            opponent=mock_civilization.return_value
+            opponent=self.civ2,
         )
         mock_logger_error.assert_not_called()
 
@@ -77,16 +85,20 @@ class TestCivilizationService(TestCase):
         mock_planet_create: MagicMock,
         mock_logger_error: MagicMock,
     ):
+        mock_civilization.side_effect = [self.civ1, self.civ2]
         mock_strategy = MagicMock(
             side_effect=TypeError("simulated argument error"))
         assert CivilizationService.validate_strategy(mock_strategy) is False
         mock_planet_create.assert_called_once_with(
             name="TestPlanet", cost=Score.COST_HIGH)
-        mock_civilization.assert_called_once_with(
-            name="TestOpponent", strategy=ANY, resources=0)
+        assert mock_civilization.call_args_list == [
+            call(name="Self", strategy=ANY, resources=0),
+            call(name="TestOpponent", strategy=ANY, resources=0),
+        ]
         mock_strategy.assert_called_once_with(
+            self=self.civ1,
             planet=mock_planet_create.return_value,
-            opponent=mock_civilization.return_value
+            opponent=self.civ2,
         )
         mock_logger_error.assert_called_with(mock_strategy.side_effect)
 
@@ -99,30 +111,24 @@ class TestCivilizationService(TestCase):
         mock_planet_create: MagicMock,
         mock_logger_error: MagicMock,
     ):
+        mock_civilization.side_effect = [self.civ1, self.civ2]
         mock_strategy = MagicMock(
             side_effect=Exception("simulated exception error"))
+
         assert CivilizationService.validate_strategy(mock_strategy) is False
+        assert mock_civilization.call_args_list == [
+            call(name="Self", strategy=ANY, resources=0),
+            call(name="TestOpponent", strategy=ANY, resources=0),
+        ]
         mock_planet_create.assert_called_once_with(
             name="TestPlanet", cost=Score.COST_HIGH)
-        mock_civilization.assert_called_once_with(
-            name="TestOpponent", strategy=ANY, resources=0)
         mock_strategy.assert_called_once_with(
+            self=self.civ1,
             planet=mock_planet_create.return_value,
-            opponent=mock_civilization.return_value
+            opponent=self.civ2,
         )
         mock_logger_error.assert_called_with(
             mock_strategy.side_effect, exc_info=True)
-
-    @patch('app.core.domain.models.Memories.add')
-    def test_remember_success(self, mock_memories_add):
-        civilization = Civilization(
-            name="TestCiv",
-            strategy=self.strategy,
-            resources=10
-        )
-        skirmish = MagicMock()
-        CivilizationService.remember(civilization, skirmish)
-        mock_memories_add.assert_called_once_with(skirmish)
 
 
 class TestSkirmishService(TestCase):
@@ -316,58 +322,77 @@ class TestModelMemories(TestCase):
         self.memories.civilizations.return_value = []
         self.memories.skirmishes.return_value = self.skirmishes
         self.memories.memories_ = [1, 2]
+        self.memory_wrapped = MemoriesServiceWrapper(self.memories)
+
+    def test_instance_success(self):
+        assert self.memory_wrapped._memories == self.memories
+
+    @patch('app.core.domain.services.memories.Memories')
+    def test_instance_default_success(self, mock_memories: MagicMock):
+        memory_wrapped = MemoriesServiceWrapper()
+        mock_memories.assert_called_once_with(owner=None)
+        assert memory_wrapped._memories == mock_memories.return_value
+
+    def test_remembers_success(self):
+        skirmish = MagicMock()
+        self.memory_wrapped.remember(skirmish)
+        self.memories.add.assert_called_once_with(skirmish)
 
     def test_civilizations_success(self):
-        assert MemoriesService.civilizations(self.memories) == []
+        assert self.memory_wrapped.civilizations() == []
         self.memories.civilizations.assert_called_once()
 
     @patch('app.core.domain.services.memories.Statistic')
     def test_statistics(self, mock_statiscs: MagicMock):
-        response = MemoriesService._statistics(
+        response = self.memory_wrapped._statistics(
             self.memories, self.civilization_1, self.rule)
         mock_statiscs.assert_called_once_with(
             1, total=len(self.memories.memories_))
         assert mock_statiscs.return_value == response
 
-    @patch('app.core.domain.services.memories.MemoriesService._statistics')
+    @patch(
+        'app.core.domain.services.memories.MemoriesServiceWrapper._statistics'
+    )
     def test_cooperations(self, mock_statiscs_method: MagicMock):
-        response = MemoriesService.cooperations(
-            self.memories, self.civilization_1)
+        response = self.memory_wrapped.cooperations(self.civilization_1)
         mock_statiscs_method.assert_called_once_with(
-            self.memories, self.civilization_1, Eval.was_cooperative)
+            self.memories, self.civilization_1, Result.was_cooperative)
         assert mock_statiscs_method.return_value == response
 
-    @patch('app.core.domain.services.memories.MemoriesService.cooperations')
+    @patch(
+        'app.core.domain.services.memories.MemoriesServiceWrapper.cooperations'
+    )
     def test_aggressions(self, mock_cooperations_method: MagicMock):
-        response = MemoriesService.aggressions(
-            self.memories, self.civilization_1)
-        mock_cooperations_method.assert_called_once_with(
-            self.memories, self.civilization_1)
+        response = self.memory_wrapped.aggressions(self.civilization_1)
+        mock_cooperations_method.assert_called_once_with(self.civilization_1)
         assert (
             mock_cooperations_method.return_value.invert.return_value
             == response
         )
 
-    @patch('app.core.domain.services.memories.MemoriesService._statistics')
+    @patch(
+        'app.core.domain.services.memories.MemoriesServiceWrapper._statistics'
+    )
     def test_conquests(self, mock_statiscs_method: MagicMock):
-        response = MemoriesService.conquests(
-            self.memories, self.civilization_1)
+        response = self.memory_wrapped.conquests(self.civilization_1)
         mock_statiscs_method.assert_called_once_with(
-            self.memories, self.civilization_1, Eval.is_conquest)
+            self.memories, self.civilization_1, Result.is_conquest)
         assert mock_statiscs_method.return_value == response
 
-    @patch('app.core.domain.services.memories.MemoriesService._statistics')
+    @patch(
+        'app.core.domain.services.memories.MemoriesServiceWrapper._statistics'
+    )
     def test_hits(self, mock_statiscs_method: MagicMock):
-        response = MemoriesService.hits(
-            self.memories, self.civilization_1)
+        response = self.memory_wrapped.hits(self.civilization_1)
         mock_statiscs_method.assert_called_once_with(
-            self.memories, self.civilization_1, Eval.is_hit)
+            self.memories, self.civilization_1, Result.is_hit)
         assert mock_statiscs_method.return_value == response
 
-    @patch('app.core.domain.services.memories.MemoriesService._statistics')
+    @patch(
+        'app.core.domain.services.memories.MemoriesServiceWrapper._statistics'
+    )
     def test_mistakes(self, mock_statiscs_method: MagicMock):
-        response = MemoriesService.mistakes(
-            self.memories, self.civilization_1)
+        response = self.memory_wrapped.mistakes(self.civilization_1)
         mock_statiscs_method.assert_called_once_with(
-            self.memories, self.civilization_1, Eval.is_mistake)
+            self.memories, self.civilization_1, Result.is_mistake)
         assert mock_statiscs_method.return_value == response

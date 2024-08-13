@@ -39,3 +39,7 @@ def planet_namer() -> str:
     suffix = choice(suffixes)
     planet_name = prefix + infix + suffix
     return planet_name
+
+
+def snake_to_pascal(snake: str) -> str:
+    return " ".join([word.capitalize() for word in snake.split("_")])

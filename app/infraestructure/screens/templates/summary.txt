@@ -1,0 +1,19 @@
+{% set bar_lenght = 32 -%}
+{% set half_bar_lenght = (bar_lenght / 2) | round | int -%}
+{% set indicator = '⦿' -%}
+{% set center = '|' -%}
+{% set fillchar = '∙' -%}
+
+{% for civ, data in summary.items() -%}
+    {% set goodfill = (bar_lenght * data['position']) | round | int -%}
+
+    {% if goodfill == (half_bar_lenght) -%}
+        {% set bar = indicator | rjust(half_bar_lenght + 1) | ljust(bar_lenght + 1) -%}
+    {% elif goodfill < (half_bar_lenght) -%}
+        {% set bar = ((indicator | rjust(goodfill) | ljust(half_bar_lenght, fillchar)) + center) | ljust(bar_lenght + 1) -%}
+    {% else -%}
+        {% set bar = ((center | rjust(half_bar_lenght + 1) | ljust(goodfill, fillchar)) + indicator) | ljust(bar_lenght + 1) -%}
+    {% endif -%}
+
+    {{ civ.name | rjust(21) }}: {{ data['score'] | string | rjust(3) }} 🪙 | {{ (data['accuracy'] * 100) | round(1) }} % 🎯 | ☠️  {{ bar }} 🕊️  {{ ((data['position'] * 100) | round(1) ) | string | rjust(5) }} % 🫶🏻 
+{% endfor -%}

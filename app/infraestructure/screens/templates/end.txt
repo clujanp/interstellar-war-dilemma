@@ -1,0 +1,8 @@
+Final game report
+Total skirmishes: {{ skirmishes }}
+Total score: {{ report['score_reached'] }} / {{ report['max_score_reachable'] }} | {{ report['score_reached'] / report['max_score_reachable'] }} %
+Resolutions:
+  - Cooperations: {{ report['resolutions']['cooperation'] }}
+  - Conquests: {{ report['resolutions']['conquest'] }}
+  - Aggressions: {{ report['resolutions']['aggression'] }}
+Good bye {{ title | colorize('red') }}!

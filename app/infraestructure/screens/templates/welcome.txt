@@ -1,0 +1,33 @@
+Welcome to {{ title | bold | colorize('red') }}!
+
+This is a game where you can play with your friends, design your own strategies to conquer the galaxy and have fun!
+
+{{ 'Steps' | bold }}:
+  1. To start playing, you need to create an account.
+     If you already have one, just log in.
+  2. Next, create and send your strategy to the Server.
+     when all players have sent their strategies, the game will start.
+
+{{ 'How to create a strategy' | bold }}:
+  1. You have to create a file with the name of your strategy.
+  2. The file must contain the following information:
+    - A Python function with:
+      - CALLED: "strategy"
+      - that receives the following PARAMETERS:
+        - self: Your self as civilization. use it to get information
+                about your civilization, like your skirmishes in the memories.
+        - planet: The planet that you want to move the ships from.
+        - opponent: The opponent's with you decide if Attack or Cooperate.
+      - and RETURNS a boolean value:
+        - True: if you want to Cooperate.
+        - False: if you want to cooperate.
+    
+    - Example:
+        {{ 'def' | colorize('magenta')}} strategy{{ '(' | colorize('yellow')}}
+            {{ 'self' | colorize('cyan')}}: Civilization, {{ 'planet' | colorize('cyan')}}: Planet, {{ 'opponent' | colorize('cyan')}}: Civilization
+        {{ ')' | colorize('yellow')}} -> {{ 'bool' | colorize('green')}}:
+            {{ 'if' | colorize('magenta')}} {{ 'opponent' | colorize('cyan') }} {{ 'in' | colorize('magenta')}} {{ 'self' | colorize('cyan')}}.memories.civilizations:
+                {{ 'return' | colorize('magenta')}} {{ 'True' | colorize('yellow')}}
+            {{ 'return' | colorize('magenta')}} {{ 'False' | colorize('yellow')}}
+
+Good luck and have fun!

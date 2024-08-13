@@ -1,5 +1,5 @@
-from .value_objects import Score, Position, Eval, Statistic
-from .models import Planet, Civilization, Skirmish, Memories
+from .value_objects import Score, Position, Result, Statistic
+from .models import Planet, Civilization, Skirmish, Memories, Round
 
 
 __all__ = [
@@ -7,8 +7,9 @@ __all__ = [
     "Civilization",
     "Skirmish",
     "Memories",
+    "Round",
     "Score",
     "Position",
-    "Eval",
+    "Result",
     "Statistic",
 ]

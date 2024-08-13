@@ -35,3 +35,21 @@ def cached(func):
 
     wrapper.cache_clear = cached_method.cache_clear
     return wrapper
+
+
+def restrict_access(allowed_contexts: list) -> callable:
+    def decorator(func: callable) -> callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> any:
+            context = kwargs.pop('context', None)
+            if context is None:
+                raise ValueError(
+                    "Context permissions must be passed as a keyword argument")
+            if context not in allowed_contexts:
+                raise PermissionError(
+                    f"Access to {func.__name__} is restricted "
+                    "in the current context."
+                )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
