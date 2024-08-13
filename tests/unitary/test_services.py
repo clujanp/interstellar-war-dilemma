@@ -42,15 +42,60 @@ class TestCivilizationService(TestCase):
         self.civ1 = MagicMock(name="Self")
         self.civ2 = MagicMock(name="TestOpponent")
 
-    def test_create_civilization_success(self):
+    @patch('app.core.domain.models.models.Memories')
+    @patch('app.core.domain.services.civilization.MemoriesServiceWrapper')
+    @patch(
+        'app.core.domain.services.civilization.CivilizationService'
+        '.validate_strategy'
+    )
+    def test_create_civilization_success(
+        self,
+        mock_validate_strategy: MagicMock,
+        mock_memories_wrapper: MagicMock,
+        mock_memories: MagicMock,
+    ):
+        mock_validate_strategy.return_value = True
         civilization = CivilizationService.create(
             name="TestCiv",
             strategy=self.strategy,
-            resources=10
+            resources=10,
+            skip_validation=False,
         )
+        mock_validate_strategy.assert_called_once_with(self.strategy)
+        mock_memories_wrapper.assert_called_once_with(
+            mock_memories.return_value)
         assert civilization.name == "TestCiv"
         assert civilization.resources == 10
-        assert civilization.memory.owner == civilization
+        assert (
+            civilization.memory.owner
+            == mock_memories_wrapper.return_value.owner
+        )
+
+    @patch('app.core.domain.models.models.Memories')
+    @patch('app.core.domain.services.civilization.MemoriesServiceWrapper')
+    @patch(
+        'app.core.domain.services.civilization.CivilizationService'
+        '.validate_strategy'
+    )
+    def test_create_civilization_skip_validateion_success(
+        self,
+        mock_validate_strategy: MagicMock,
+        mock_memories_wrapper: MagicMock,
+        mock_memories: MagicMock,
+    ):
+        civilization = CivilizationService.create(
+            name="TestCiv",
+            strategy=self.strategy,
+            resources=10,
+            skip_validation=True,
+        )
+        mock_validate_strategy.assert_not_called
+        assert civilization.name == "TestCiv"
+        assert civilization.resources == 10
+        assert (
+            civilization.memory.owner
+            == mock_memories_wrapper.return_value.owner
+        )
 
     @patch('logging.Logger.error')
     @patch('app.core.domain.services.planet.PlanetService.create')
@@ -100,7 +145,11 @@ class TestCivilizationService(TestCase):
             planet=mock_planet_create.return_value,
             opponent=self.civ2,
         )
-        mock_logger_error.assert_called_with(mock_strategy.side_effect)
+        assert mock_logger_error.call_args_list == [
+            call('-' * 80),
+            call(mock_strategy.side_effect, exc_info=True),
+            call('-' * 80),
+        ]
 
     @patch('logging.Logger.error')
     @patch('app.core.domain.services.planet.PlanetService.create')
@@ -127,8 +176,11 @@ class TestCivilizationService(TestCase):
             planet=mock_planet_create.return_value,
             opponent=self.civ2,
         )
-        mock_logger_error.assert_called_with(
-            mock_strategy.side_effect, exc_info=True)
+        assert mock_logger_error.call_args_list == [
+            call('-' * 80),
+            call(mock_strategy.side_effect, exc_info=True),
+            call('-' * 80),
+        ]
 
 
 class TestSkirmishService(TestCase):
@@ -158,8 +210,14 @@ class TestSkirmishService(TestCase):
         assert skirmish.civilization_1 == self.civilization_1
         assert skirmish.civilization_2 == self.civilization_2
 
+    def test_results_success(self):
+        skirmish = MagicMock()
+        result = SkirmishService.results(skirmish)
+        assert result == (
+            skirmish.winner_, skirmish.score_1, skirmish.score_2)
+
     @patch('app.core.domain.services.skirmish.SkirmishService._decide_winner')
-    def test_resolve_skirmish_already_resolved_success(
+    def test_resolve_skirmish_already_resolved_fail(
         self, mock_decide_winner
     ):
         skirmish = MagicMock(winner_=True)
@@ -179,9 +237,15 @@ class TestSkirmishService(TestCase):
         result = SkirmishService.resolve(skirmish)
 
         skirmish.civilization_1.strategy.assert_called_once_with(
-            planet=skirmish.planet, opponent=skirmish.civilization_2)
+            self=skirmish.civilization_1,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_2
+        )
         skirmish.civilization_2.strategy.assert_called_once_with(
-            planet=skirmish.planet, opponent=skirmish.civilization_1)
+            self=skirmish.civilization_2,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_1
+        )
         mock_decide_winner.assert_called_once_with(
             skirmish, Score.TIE_GOOD, Score.TIE_GOOD)
         assert result == (
@@ -199,9 +263,15 @@ class TestSkirmishService(TestCase):
         result = SkirmishService.resolve(skirmish)
 
         skirmish.civilization_1.strategy.assert_called_once_with(
-            planet=skirmish.planet, opponent=skirmish.civilization_2)
+            self=skirmish.civilization_1,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_2
+        )
         skirmish.civilization_2.strategy.assert_called_once_with(
-            planet=skirmish.planet, opponent=skirmish.civilization_1)
+            self=skirmish.civilization_2,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_1
+        )
         mock_decide_winner.assert_called_once_with(
             skirmish, Score.TIE_BAD, Score.TIE_BAD)
         assert result == (
@@ -219,9 +289,15 @@ class TestSkirmishService(TestCase):
         result = SkirmishService.resolve(skirmish)
 
         skirmish.civilization_1.strategy.assert_called_once_with(
-            planet=skirmish.planet, opponent=skirmish.civilization_2)
+            self=skirmish.civilization_1,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_2
+        )
         skirmish.civilization_2.strategy.assert_called_once_with(
-            planet=skirmish.planet, opponent=skirmish.civilization_1)
+            self=skirmish.civilization_2,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_1
+        )
         mock_decide_winner.assert_called_once_with(
             skirmish, Score.WIN, Score.LOSE)
         assert result == (
@@ -239,9 +315,15 @@ class TestSkirmishService(TestCase):
         result = SkirmishService.resolve(skirmish)
 
         skirmish.civilization_1.strategy.assert_called_once_with(
-            planet=skirmish.planet, opponent=skirmish.civilization_2)
+            self=skirmish.civilization_1,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_2
+        )
         skirmish.civilization_2.strategy.assert_called_once_with(
-            planet=skirmish.planet, opponent=skirmish.civilization_1)
+            self=skirmish.civilization_2,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_1
+        )
         mock_decide_winner.assert_called_once_with(
             skirmish, Score.LOSE, Score.WIN)
         assert result == (
