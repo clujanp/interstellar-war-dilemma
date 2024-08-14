@@ -29,6 +29,12 @@ class TestModelMemories(TestCase):
         mock_memories.assert_called_once_with(owner=None)
         assert memory_wrapped._memories == mock_memories.return_value
 
+    def test_owner_success(self):
+        assert self.memory_wrapped.owner == self.memories.owner
+
+    def test_length_success(self):
+        assert self.memory_wrapped.length == 2
+
     def test_remembers_success(self):
         skirmish = MagicMock()
         self.memory_wrapped.remember(skirmish)
@@ -39,6 +45,13 @@ class TestModelMemories(TestCase):
             self.memory_wrapped.civilizations()
             == self.memories.civilizations
         )
+
+    def test_skirmishes_count_success(self):
+        self.memories.skirmishes_count_by_civilization.return_value = {
+            self.civilization_1: 1
+        }
+        assert (
+            self.memory_wrapped.skirmishes_count(self.civilization_1) == 1)
 
     @patch(
         'app.core.domain.services.memories.MemoriesServiceWrapper'
