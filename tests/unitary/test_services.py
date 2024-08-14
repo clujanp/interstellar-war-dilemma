@@ -400,8 +400,7 @@ class TestModelMemories(TestCase):
             self.civilization_1: [(Position.COOPERATION, Score.LOSE,)],
             self.civilization_2: [(Position.AGGRESSION, Score.WIN,)],
         }
-        self.memories = MagicMock(owner=None)
-        self.memories.civilizations.return_value = []
+        self.memories = MagicMock(name='memories', owner=None)
         self.memories.skirmishes.return_value = self.skirmishes
         self.memories.memories_ = [1, 2]
         self.memory_wrapped = MemoriesServiceWrapper(self.memories)
@@ -421,15 +420,28 @@ class TestModelMemories(TestCase):
         self.memories.add.assert_called_once_with(skirmish)
 
     def test_civilizations_success(self):
-        assert self.memory_wrapped.civilizations() == []
-        self.memories.civilizations.assert_called_once()
+        assert (
+            self.memory_wrapped.civilizations()
+            == self.memories.civilizations
+        )
 
+    @patch(
+        'app.core.domain.services.memories.MemoriesServiceWrapper'
+        '.skirmishes_count'
+    )
     @patch('app.core.domain.services.memories.Statistic')
-    def test_statistics(self, mock_statiscs: MagicMock):
+    def test_statistics(
+        self,
+        mock_statiscs: MagicMock,
+        mock_skirmishes_count: MagicMock
+    ):
+        self.memories.skirmishes_by_civilization.return_value = {
+            self.civilization_1: [('posture', 'score')]}
+        mock_skirmishes_count.return_value = 1
         response = self.memory_wrapped._statistics(
-            self.memories, self.civilization_1, self.rule)
-        mock_statiscs.assert_called_once_with(
-            1, total=len(self.memories.memories_))
+            self.civilization_1, self.rule)
+
+        mock_statiscs.assert_called_once_with(1, total=1)
         assert mock_statiscs.return_value == response
 
     @patch(
@@ -438,7 +450,7 @@ class TestModelMemories(TestCase):
     def test_cooperations(self, mock_statiscs_method: MagicMock):
         response = self.memory_wrapped.cooperations(self.civilization_1)
         mock_statiscs_method.assert_called_once_with(
-            self.memories, self.civilization_1, Result.was_cooperative)
+            self.civilization_1, Result.was_cooperative)
         assert mock_statiscs_method.return_value == response
 
     @patch(
@@ -458,7 +470,7 @@ class TestModelMemories(TestCase):
     def test_conquests(self, mock_statiscs_method: MagicMock):
         response = self.memory_wrapped.conquests(self.civilization_1)
         mock_statiscs_method.assert_called_once_with(
-            self.memories, self.civilization_1, Result.is_conquest)
+            self.civilization_1, Result.is_conquest)
         assert mock_statiscs_method.return_value == response
 
     @patch(
@@ -467,7 +479,7 @@ class TestModelMemories(TestCase):
     def test_hits(self, mock_statiscs_method: MagicMock):
         response = self.memory_wrapped.hits(self.civilization_1)
         mock_statiscs_method.assert_called_once_with(
-            self.memories, self.civilization_1, Result.is_hit)
+            self.civilization_1, Result.is_hit)
         assert mock_statiscs_method.return_value == response
 
     @patch(
@@ -476,5 +488,5 @@ class TestModelMemories(TestCase):
     def test_mistakes(self, mock_statiscs_method: MagicMock):
         response = self.memory_wrapped.mistakes(self.civilization_1)
         mock_statiscs_method.assert_called_once_with(
-            self.memories, self.civilization_1, Result.is_mistake)
+            self.civilization_1, Result.is_mistake)
         assert mock_statiscs_method.return_value == response
