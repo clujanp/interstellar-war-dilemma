@@ -88,7 +88,7 @@ class MemoriesServiceWrapper:
         return civilizations_score
 
     def report(self) -> Dict[str, Dict[str, int]]:
-        resolutions = defaultdict(int)
+        resolutions = {'cooperations': 0, 'conquests': 0, 'aggressions': 0}
         for skirmish in self._memories.skirmishes:
             result = skirmish.result
             if result == Result.COOPERATION:
