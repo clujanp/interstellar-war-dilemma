@@ -1,5 +1,4 @@
 from typing import List, Callable, Optional, Tuple, Dict
-from collections import defaultdict
 from app.core.domain.models import (
     Score, Result, Statistic, Civilization, Skirmish, Memories)
 
