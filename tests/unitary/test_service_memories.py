@@ -210,3 +210,36 @@ class TestModelMemories(TestCase):
                 'cooperations': 1, 'conquests': 1, 'aggressions': 1},
             'avg_planets_cost': 500 / 3
         }
+
+    def test_last_position_success(self):
+        self.memories.skirmishes_by_civilization.return_value = {
+            self.civilization_1: [
+                (Position.COOPERATION, Score.LOSE,),
+                (Position.AGGRESSION, Score.WIN,),
+            ]
+        }
+        response = self.memory_wrapped.last_position(self.civilization_1)
+        assert response == Position.AGGRESSION
+
+    def test_last_position_not_found(self):
+        self.memories.skirmishes_by_civilization.return_value = {}
+        response = self.memory_wrapped.last_position(self.civilization_1)
+        assert response is None
+
+    def test_last_score_success(self):
+        self.memories.skirmishes_by_civilization.return_value = {
+            self.civilization_1: [
+                (Position.COOPERATION, Score.LOSE,),
+                (Position.AGGRESSION, Score.WIN,),
+            ]
+        }
+        response = self.memory_wrapped.last_score(self.civilization_1)
+        assert response == Score.WIN
+
+    def test_last_score_not_found(self):
+        self.memories.skirmishes_by_civilization.return_value = {}
+        response = self.memory_wrapped.last_score(self.civilization_1)
+        assert response is None
+
+    def test_save_success(self):
+        self.memory_wrapped.save()
