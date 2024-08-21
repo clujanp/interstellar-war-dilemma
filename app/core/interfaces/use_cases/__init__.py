@@ -1,11 +1,9 @@
-from random import choices
 from typing import List, Callable, Tuple
 from app.core.domain.services import (
     PlanetService, CivilizationService, SkirmishService, RoundService,
     MemoriesServiceWrapper
 )
 from app.core.domain.models import Planet, Civilization, Skirmish, Round
-from app.infraestructure.logging import logger
 
 
 class PlanetUseCases:
@@ -56,26 +54,7 @@ class RoundUseCases:
     def decide_opponents(
         civilizations: List[Civilization]
     ) -> List[Tuple[Civilization, Civilization]]:
-        assert len(civilizations) % 2 == 0, "Invalid number of civilizations"
-
-        done = []
-        opponents = []
-        for civilization in civilizations:
-            if civilization not in done:
-                odds = {
-                    opponent: (
-                        (civilization.memory.length + 1)
-                        - civilization.memory.skirmishes_count(opponent)
-                    )
-                    for opponent in civilizations
-                    if opponent != civilization and opponent not in done
-                }
-                options, weights = zip(*odds.items())
-                opponent = choices(options, weights=weights, k=1)[0]
-                opponents.append((civilization, opponent,))
-                done.append(civilization)
-                done.append(opponent)
-        return opponents
+        return RoundService.decide_opponents(civilizations)
 
     def create_round(self, number: int, skirmishes: List[Skirmish]) -> Round:
         return self.service.create(number, skirmishes)
