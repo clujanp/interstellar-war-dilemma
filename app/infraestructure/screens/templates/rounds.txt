@@ -1,0 +1,9 @@
+{% for round in rounds[-(n_last_rounds):] -%}
+{{ ('Round #' + round.number|string).center(72) }}
+{% for skirmish in round.skirmishes -%}
+    {%- set posture_1 = '✌🏻 ' if skirmish.posture_1 else '🖕🏻' -%}
+    {%- set posture_2 = '✌🏻 ' if skirmish.posture_2 else '🖕🏻' -%}
+    {%- set result = '🤝🏻' if skirmish.posture_1 and skirmish.posture_2 else '⚔️ ' if not skirmish.posture_1 and not skirmish.posture_2 else '🩸' -%}
+{{ skirmish.civilization_1.name | rjust(26) }} {{ posture_1 }} : {{ skirmish.score_1 }}  {{ result }}  {{ skirmish.score_2 }} : {{ posture_2 }} {{ skirmish.civilization_2.name | ljust(26) }}
+{% endfor -%}
+{% endfor -%}
