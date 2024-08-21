@@ -17,92 +17,92 @@ jobs:
       with:
         python-version: ${{ vars.PYTHON_VERSION }}
 
-    - name: Install dependencies and package Lambda
-      env:
-        REQUIREMENTS_PROD: ${{ vars.REQUIREMENTS_PROD}}
-        SRC_FOLDER: ${{ vars.SRC_FOLDER }}
-      run: |
-        cp -r ${SRC_FOLDER}/ ./package/
-        cd package
-        zip -r ../lambda_function.zip .
-        mv ../lambda_function.zip ../terraform/lambda_function.zip
+    # - name: Install dependencies and package Lambda
+    #   env:
+    #     REQUIREMENTS_PROD: ${{ vars.REQUIREMENTS_PROD}}
+    #     SRC_FOLDER: ${{ vars.SRC_FOLDER }}
+    #   run: |
+    #     cp -r ${SRC_FOLDER}/ ./package/
+    #     cd package
+    #     zip -r ../lambda_function.zip .
+    #     mv ../lambda_function.zip ../terraform/lambda_function.zip
 
-    - name: Package dependencies for Lambda layer
-      env:
-        REQUIREMENTS_PROD: ${{ vars.REQUIREMENTS_PROD}}
-      run: |
-        mkdir -p python
-        pip install -r ${REQUIREMENTS_PROD} -t python/
-        zip -r dependencies.zip python/
-        mv dependencies.zip terraform/dependencies.zip
+    # - name: Package dependencies for Lambda layer
+    #   env:
+    #     REQUIREMENTS_PROD: ${{ vars.REQUIREMENTS_PROD}}
+    #   run: |
+    #     mkdir -p python
+    #     pip install -r ${REQUIREMENTS_PROD} -t python/
+    #     zip -r dependencies.zip python/
+    #     mv dependencies.zip terraform/dependencies.zip
 
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: 1.9.0
+    # - name: Set up Terraform
+    #   uses: hashicorp/setup-terraform@v3
+    #   with:
+    #     terraform_version: 1.9.0
     
-    - name: Change to Terraform directory
-      run: | 
-        cd terraform
-        pwd
-        ls -la
+    # - name: Change to Terraform directory
+    #   run: | 
+    #     cd terraform
+    #     pwd
+    #     ls -la
 
-    - name: Terraform Init in Staging
-      if: github.ref == 'refs/heads/staging'
-      working-directory: terraform
-      run: |  
-        terraform init \
-        -backend-config="access_key=${{ secrets.STAGING_TF_BACKEND_ACCESS_KEY }}" \
-        -backend-config="secret_key=${{ secrets.STAGING_TF_BACKEND_SECRET_KEY }}" \
-        -backend-config="bucket=${{ vars.STAGING_TF_STATE_BUCKET }}" \
-        -backend-config="key=${{ vars.STAGING_TF_STATE_KEY }}" \
-        -backend-config="region=${{ vars.STAGING_TF_BACKEND_AWS_REGION }}"
+    # - name: Terraform Init in Staging
+    #   if: github.ref == 'refs/heads/staging'
+    #   working-directory: terraform
+    #   run: |  
+    #     terraform init \
+    #     -backend-config="access_key=${{ secrets.STAGING_TF_BACKEND_ACCESS_KEY }}" \
+    #     -backend-config="secret_key=${{ secrets.STAGING_TF_BACKEND_SECRET_KEY }}" \
+    #     -backend-config="bucket=${{ vars.STAGING_TF_STATE_BUCKET }}" \
+    #     -backend-config="key=${{ vars.STAGING_TF_STATE_KEY }}" \
+    #     -backend-config="region=${{ vars.STAGING_TF_BACKEND_AWS_REGION }}"
 
-    - name: Terraform Init in Production
-      if: github.ref == 'refs/heads/main'
-      working-directory: terraform
-      run: |  
-        terraform init \
-        -backend-config="access_key=${{ secrets.PRODUCTION_TF_BACKEND_ACCESS_KEY }}" \
-        -backend-config="secret_key=${{ secrets.PRODUCTION_TF_BACKEND_SECRET_KEY }}" \
-        -backend-config="bucket=${{ vars.PRODUCTION_TF_STATE_BUCKET }}" \
-        -backend-config="key=${{ vars.PRODUCTION_TF_STATE_KEY }}" \
-        -backend-config="region=${{ vars.PRODUCTION_TF_BACKEND_AWS_REGION }}"
+    # - name: Terraform Init in Production
+    #   if: github.ref == 'refs/heads/main'
+    #   working-directory: terraform
+    #   run: |  
+    #     terraform init \
+    #     -backend-config="access_key=${{ secrets.PRODUCTION_TF_BACKEND_ACCESS_KEY }}" \
+    #     -backend-config="secret_key=${{ secrets.PRODUCTION_TF_BACKEND_SECRET_KEY }}" \
+    #     -backend-config="bucket=${{ vars.PRODUCTION_TF_STATE_BUCKET }}" \
+    #     -backend-config="key=${{ vars.PRODUCTION_TF_STATE_KEY }}" \
+    #     -backend-config="region=${{ vars.PRODUCTION_TF_BACKEND_AWS_REGION }}"
 
-    - name: Terraform Plan in Staging
-      if: github.ref == 'refs/heads/staging'
-      working-directory: terraform
-      run: |
-        terraform plan -out=tfplan -var-file="${ENV}.tfvars" -var="aws_account_id=${AWS_ACCOUNT_ID}"
-      env:
-        ENV: staging
-        AWS_ACCOUNT_ID: ${{ secrets.STAGING_AWS_ACCOUNT_ID }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
+    # - name: Terraform Plan in Staging
+    #   if: github.ref == 'refs/heads/staging'
+    #   working-directory: terraform
+    #   run: |
+    #     terraform plan -out=tfplan -var-file="${ENV}.tfvars" -var="aws_account_id=${AWS_ACCOUNT_ID}"
+    #   env:
+    #     ENV: staging
+    #     AWS_ACCOUNT_ID: ${{ secrets.STAGING_AWS_ACCOUNT_ID }}
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
 
-    - name: Terraform Plan in Production
-      if: github.ref == 'refs/heads/main'
-      working-directory: terraform
-      run: |
-        terraform plan -out=tfplan -var-file="${ENV}.tfvars" -var="aws_account_id=${AWS_ACCOUNT_ID}"
-      env:
-        ENV: production
-        AWS_ACCOUNT_ID: ${{ secrets.PRODUCTION_AWS_ACCOUNT_ID }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
+    # - name: Terraform Plan in Production
+    #   if: github.ref == 'refs/heads/main'
+    #   working-directory: terraform
+    #   run: |
+    #     terraform plan -out=tfplan -var-file="${ENV}.tfvars" -var="aws_account_id=${AWS_ACCOUNT_ID}"
+    #   env:
+    #     ENV: production
+    #     AWS_ACCOUNT_ID: ${{ secrets.PRODUCTION_AWS_ACCOUNT_ID }}
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
 
-    - name: Terraform Apply in Staging
-      if: github.ref == 'refs/heads/staging'
-      working-directory: terraform
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
-      run: terraform apply -auto-approve tfplan
+    # - name: Terraform Apply in Staging
+    #   if: github.ref == 'refs/heads/staging'
+    #   working-directory: terraform
+    #   env:
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
+    #   run: terraform apply -auto-approve tfplan
 
-    - name: Terraform Apply in Production
-      if: github.ref == 'refs/heads/main'
-      working-directory: terraform
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
-      run: terraform apply -auto-approve tfplan
+    # - name: Terraform Apply in Production
+    #   if: github.ref == 'refs/heads/main'
+    #   working-directory: terraform
+    #   env:
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
+    #   run: terraform apply -auto-approve tfplan
