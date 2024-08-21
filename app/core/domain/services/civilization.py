@@ -1,5 +1,5 @@
 from typing import Callable
-from app.core.domain.models import Score, Civilization
+from app.core.domain.models import Cost, Civilization
 from app.infraestructure.logging import logger
 from .planet import PlanetService
 from .memories import MemoriesServiceWrapper
@@ -29,7 +29,7 @@ class CivilizationService:
     @classmethod
     def validate_strategy(cls, strategy: Callable) -> bool:
         test_planet = PlanetService.create(
-            name="TestPlanet", cost=Score.COST_HIGH)
+            name="TestPlanet", cost=Cost.HIGH)
         test_self = cls.create(
             name="Self", strategy=lambda: True, resources=0,
             skip_validation=True

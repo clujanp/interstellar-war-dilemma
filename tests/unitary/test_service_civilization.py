@@ -1,7 +1,7 @@
 import init  # noqa: F401
 from unittest import TestCase
 from unittest.mock import MagicMock, patch, ANY, call
-from app.core.domain.models import Score
+from app.core.domain.models import Cost
 from app.core.domain.services import CivilizationService
 
 
@@ -78,7 +78,7 @@ class TestCivilizationService(TestCase):
         mock_civilization.side_effect = [self.civ1, self.civ2]
         assert CivilizationService.validate_strategy(self.strategy) is True
         mock_planet_create.assert_called_once_with(
-            name="TestPlanet", cost=Score.COST_HIGH)
+            name="TestPlanet", cost=Cost.HIGH)
         assert mock_civilization.call_args_list == [
             call(name="Self", strategy=ANY, resources=0),
             call(name="TestOpponent", strategy=ANY, resources=0),
@@ -104,7 +104,7 @@ class TestCivilizationService(TestCase):
             side_effect=TypeError("simulated argument error"))
         assert CivilizationService.validate_strategy(mock_strategy) is False
         mock_planet_create.assert_called_once_with(
-            name="TestPlanet", cost=Score.COST_HIGH)
+            name="TestPlanet", cost=Cost.HIGH)
         assert mock_civilization.call_args_list == [
             call(name="Self", strategy=ANY, resources=0),
             call(name="TestOpponent", strategy=ANY, resources=0),
@@ -139,7 +139,7 @@ class TestCivilizationService(TestCase):
             call(name="TestOpponent", strategy=ANY, resources=0),
         ]
         mock_planet_create.assert_called_once_with(
-            name="TestPlanet", cost=Score.COST_HIGH)
+            name="TestPlanet", cost=Cost.HIGH)
         mock_strategy.assert_called_once_with(
             self=self.civ1,
             planet=mock_planet_create.return_value,

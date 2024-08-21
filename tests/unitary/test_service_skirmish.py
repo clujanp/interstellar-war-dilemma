@@ -1,7 +1,7 @@
 import init  # noqa: F401
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
-from app.core.domain.models import Civilization, Planet, Score, Position
+from app.core.domain.models import Civilization, Planet, Score, Cost, Position
 from app.core.domain.services import SkirmishService
 
 
@@ -9,7 +9,7 @@ class TestSkirmishService(TestCase):
     def setUp(self):
         self.planet = Planet(
             name="CustomPlanet",
-            cost=Score.COST_HIGH
+            cost=Cost.HIGH
         )
         self.civilization_1 = Civilization(
             name="TestCiv1",

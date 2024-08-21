@@ -3,10 +3,6 @@ class Score(int):
     TIE_BAD = 1
     TIE_GOOD = 3
     WIN = 5
-    COST_HIGH = 3
-    COST_MEDIUM = 2
-    COST_LOW = 1
-    COST_NONE = 0
     MAX_SCORE = 6
 
     def __new__(cls, value: int):
@@ -15,6 +11,13 @@ class Score(int):
         return super().__new__(cls, value)
 
     def __repr__(self): return str(self)
+
+
+class Cost:
+    HIGH = 3
+    MEDIUM = 2
+    LOW = 1
+    NONE = 0
 
 
 class Position:
