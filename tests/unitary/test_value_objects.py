@@ -1,7 +1,7 @@
 import init  # noqa: F401
 from unittest import TestCase
 from app.core.domain.models.value_objects import (
-    Score, Cost, Position, Result, Statistic)
+    Score, Position, Result, Statistic)
 
 
 class TestScore(TestCase):
