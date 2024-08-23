@@ -15,27 +15,13 @@ class BuiltInStrategies:
 
     @staticmethod
     def random(**_) -> bool:
-        from random import choice
         return choice([Position.COOPERATION, Position.AGGRESSION])
 
     @staticmethod
     def reply_last(
         self: Civilization, opponent: Civilization, **_
     ) -> bool:
-        from random import choice
         last_skirmish = self.memory.last_position(opponent)
         if last_skirmish is not None:
             return last_skirmish
         return choice([Position.COOPERATION, Position.AGGRESSION])
-
-
-AVAILABLE_STRATEGIES = {
-    'always_cooperation': BuiltInStrategies.always_cooperation,
-    'always_aggression': BuiltInStrategies.always_aggression,
-    'random': BuiltInStrategies.random,
-    'reply_last': BuiltInStrategies.reply_last,
-}
-
-
-def select_random_builtin() -> callable:
-    return choice(list(AVAILABLE_STRATEGIES.values()))
