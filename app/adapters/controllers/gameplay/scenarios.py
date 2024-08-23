@@ -1,5 +1,4 @@
 from .controller import GameplayController as Controller
-from gameplay.strategy import select_random_builtin
 from app.utils.functions import snake_to_pascal
 from app.core.domain.models import Score
 
@@ -14,22 +13,23 @@ def welcome(context: dict, *_) -> None:
 
 @Controller.scenario('start', 'civilizations_start.txt', alias=['s'])
 def start(context: dict, *_) -> None:
-    controller = context['controller']
-    use_cases = context['use_cases']['civilizations']
+    civilization_use_cases = context['use_cases']['civilizations']
+    strategies_use_cases = context['use_cases']['strategies']
     initial_resources = context['config']['initial_resources']
     plus_civ_name = context['config']['complementary_civilization_name']
 
-    strategies = controller.load_strategies()
+    strategies = strategies_use_cases.load_strategies()
     context['civilizations'] = []
     for name, strategy in strategies.items():
         name = snake_to_pascal(name)
-        civ = use_cases.register(name, strategy, initial_resources)
+        civ = civilization_use_cases.register(
+            name, strategy, initial_resources)
         context['civilizations'].append(civ)
 
     if len(context['civilizations']) % 2 > 0:
-        aditional_civ = use_cases.register(
+        aditional_civ = civilization_use_cases.register(
             plus_civ_name,
-            select_random_builtin(),
+            strategies_use_cases.select_random_builtin(),
             initial_resources,
         )
         context['civilizations'].append(aditional_civ)
