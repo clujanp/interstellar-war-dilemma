@@ -8,8 +8,8 @@ from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
 class TestSecureProxy(TestCase):
     def setUp(self):
         self.mock_obj = MagicMock()
-        self.readable_attrs = ['readable_attr']
-        self.writable_attrs = ['writable_attr']
+        self.readable_attrs = ['readable_attr', 'prop_attr']
+        self.writable_attrs = ['writable_attr', 'prop_attr']
         self.accessible_methods = ['accessible_method']
         self.proxy = SecureProxy(
             self.mock_obj,
@@ -66,3 +66,28 @@ class TestSecureProxy(TestCase):
         self.mock_obj.accessible_method = MagicMock(return_value='result')
         result = self.proxy.accessible_method()
         assert 'result' == result
+
+    def test_getattr_property_success(self):
+        type(self.mock_obj).prop_attr = property(
+            fget=MagicMock(return_value='prop_value'))
+        result = self.proxy.prop_attr
+        assert result == 'prop_value'
+
+    def test_setattr_property_success(self):
+        fset_mock = MagicMock()
+        type(self.mock_obj).prop_attr = property(
+            fget=MagicMock(return_value='prop_value'),
+            fset=fset_mock
+        )
+        self.proxy.prop_attr = 'new_value'
+        fset_mock.assert_called_once_with(self.mock_obj, 'new_value')
+
+    def test_setattr_property_no_fset_fail(self):
+        type(self.mock_obj).prop_attr = property(
+            fget=MagicMock(return_value='prop_value'))
+        with self.assertRaises(AttributeError) as context:
+            self.proxy.prop_attr = 'new_value'
+        assert (
+            ERR_MSG['not_modify'].format('prop_attr')
+            == str(context.exception)
+        )
