@@ -20,7 +20,9 @@
    - Verifica `MagicMock` con métodos como `assert_called_*` para asegurar el comportamiento esperado.
 
 7. **Bloques de Código:**
-   - Si un bloque de test excede 5 líneas, divide con una línea en blanco entre las acciones de prueba y las validaciones, pero mantén juntas las validaciones `MagicMock.assert_*` y `assert`.
+   - Si un bloque de test excede 8 líneas, divide con una línea en blanco solo entre las acciones de prueba y las validaciones, pero mantén juntas las validaciones `MagicMock.assert_*` y `assert`.
+   - Apegarse a las PEP8 para la longitud de línea máxima de 79 columnas para el codigo y 72 lineas para comentarios.
+   - se usa linter Flake8 para verificar el cumplimiento de las reglas de estilo.
 
 8. **Nomenclatura de Tests:**
    - Sigue el formato `test_<metodo_funcion>[_<variante>]_<success|fail>` para nombrar los casos de prueba.
@@ -29,7 +31,9 @@
 
 ```python
 import init  # noqa: F401
-from unittest import TestCase, MagicMock
+from unittest import TestCase
+from unittest.mock import MagicMock
+
 
 class MyTestCase(TestCase):
     def setUp(self):
@@ -46,9 +50,11 @@ class MyTestCase(TestCase):
         result = self.instance.another_method()
         expected_result = 'expected_value'
         
-        self.mocked_dependency.another_method.assert_called_with('some_argument')
+        self.mocked_dependency.another_method.assert_called_with(
+         'some_argument')
         assert result == expected_result
 
     def test_method_with_invalid_input_fail(self):
         with self.assertRaises(ValueError):
             self.instance.method_with_invalid_input('invalid')
+```

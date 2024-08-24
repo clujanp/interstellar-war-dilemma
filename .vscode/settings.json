@@ -12,6 +12,6 @@
         79
     ],
     "github-actions.workflows.pinned.workflows": [
-        ".github/workflows/cd.yml"
+        ".github/workflows/pre-ci.yml"
     ]
 }
