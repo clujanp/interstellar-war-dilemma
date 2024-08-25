@@ -8,8 +8,8 @@ DESCRIPTION="Common Utilities for Python Repositories."
 
 SRC_FOLDER="app"
 PYTHON_VERSION="3.11"
-TESTS_FOLDER="tests/unitary"
-TEST_INTEGRATION_MODULE=tests.integration.main
+TEST_UNITARY_PATH="tests/unitary"
+TEST_INTEGRATION_PATH="tests/integration"
 REQUIREMENTS_PROD="config/requirements/production.txt"
 REQUIREMENTS_DEV="config/requirements/development.txt"
 ENTRY_POINT="app/main.py"
@@ -112,22 +112,22 @@ install_lint() {
 # Run tests with coverage
 cov() {
     venv_activate
-    pytest --cov=$SRC_FOLDER/ $TESTS_FOLDER/ --cov-fail-under=$COV_PERCENT  --cov-report html
+    pytest --cov=$SRC_FOLDER/ $TEST_UNITARY_PATH/ --cov-fail-under=$COV_PERCENT  --cov-report html
 }
 
 # Run tests with coverage
 integration() {
     venv_activate
-    python -m $TEST_INTEGRATION_MODULE
+    pytest $TEST_INTEGRATION_PATH
 }
 
 # Run tests
 test() {
     venv_activate
     if [ -n "$@" ]; then
-        pytest -vv --tb=short $SRC_FOLDER/ $TESTS_FOLDER/ "$@"
+        pytest -vv --tb=short $SRC_FOLDER/ $TEST_UNITARY_PATH/ "$@"
     else
-        pytest -vv --tb=short --cov=$SRC_FOLDER/ $TESTS_FOLDER/ --cov-fail-under=$COV_PERCENT
+        pytest -vv --tb=short --cov=$SRC_FOLDER/ $TEST_UNITARY_PATH/ --cov-fail-under=$COV_PERCENT
     fi
 }
 
@@ -136,9 +136,9 @@ test_log() {
     clear
     venv_activate
     if [ -n "$@" ]; then
-        pytest -o log_cli=true -vv --tb=short $TESTS_FOLDER/ "$@"
+        pytest -o log_cli=true -vv --tb=short $TEST_UNITARY_PATH/ "$@"
     else
-        pytest -o log_cli=true -vv --tb=short --cov=$SRC_FOLDER/ $TESTS_FOLDER/ --cov-fail-under=$COV_PERCENT
+        pytest -o log_cli=true -vv --tb=short --cov=$SRC_FOLDER/ $TEST_UNITARY_PATH/ --cov-fail-under=$COV_PERCENT
     fi
 }
 
