@@ -28,13 +28,14 @@ class StrategiesUseCases:
     def load_strategies(self) -> dict[str, callable]:
         strategies = self.service.load_strategies()
         test_planet, test_self, test_opponent = self._get_test_entities()
+        valid_strategies = {}
         for name, strategy in strategies.items():
             strategy = self.service.mask_strategy(strategy)
-            if not self.service.validate_strategy(
+            if self.service.validate_strategy(
                 strategy, test_planet, test_self, test_opponent
             ):
-                raise ValueError(f"Invalid strategy {strategy}")
-        return strategies
+                valid_strategies[name] = strategy
+        return valid_strategies
 
     def _get_test_entities(self) -> Tuple[Planet, Civilization, Civilization]:
         return (
