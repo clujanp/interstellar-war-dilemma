@@ -1,27 +1,73 @@
 from app.core.interfaces.repositories.strategies import StrategyRepository
 from app.core.domain.models import Civilization, Planet
+from app.core.interfaces.proxies import Proxy
 from app.infraestructure.logging import logger
+from app.config.messages import ERR_STRATEGY_SERVICE
+from .memories import MemoriesServiceWrapper
 
 
 class StrategyService:
-    def __init__(self, repository: StrategyRepository):
+    SHOW_TRACEBACK_VALIDATION: bool = False
+
+    def __init__(
+        self, repository: StrategyRepository, proxy_factory: callable
+    ):
         self.repository = repository
+        self.proxy_factory = proxy_factory
 
     def load_strategies(self) -> dict[str, callable]:
         return self.repository.load_strategies()
 
     def mask_strategy(self, strategy: callable) -> callable:
-        # TODO: mask for:
-        # - new definition of stratgy args
-        # - error handling
-        # - cost pre validation and management
-        return strategy
+        """
+        for called with SkirmishService.resolve:
+            strategy(
+                self: Civilization,
+                planet: Planet,
+                opponent: Civilization,
+            ) -> bool: COOPERATION | AGGRESSION
+        for design:
+            strategy(
+                opponent: Civilization,
+                planet: Planet,
+                memories: MemoriesServiceWrapper,
+                resources: int
+            ) -> bool: COOPERATION | AGGRESSION
+        """
+        def wrapper(
+            self: Civilization,
+            planet: Planet,
+            opponent: Civilization,
+        ) -> bool:
+            if opponent.memory.is_ally(self.name):
+                opponent.memory
+            return strategy(
+                opponent=opponent,
+                planet=planet,
+                memories=self.memory,
+                resources=self.resources,
+            )
+            
+        wrapper.name = strategy.__name__
+        return wrapper
+
+    def _mask_execution_entities(
+        self,
+        opponent: Civilization,
+        planet: Planet,
+        memories: MemoriesServiceWrapper,
+    ) -> tuple[Proxy, Proxy, Proxy]:
+        return (
+            self.proxy_factory(opponent),
+            self.proxy_factory(planet),
+            self.proxy_factory(memories),
+        )
 
     def select_random_builtin(self) -> callable:
         return self.repository.select_random_builtin()
 
-    @staticmethod
     def validate_strategy(
+        self,
         strategy: callable,
         test_planet: Planet,
         test_self: Civilization,
@@ -29,21 +75,25 @@ class StrategyService:
     ) -> bool:
         # TODO: adjust for improves in mask_strategy
         try:
-            return strategy(
+            response = strategy(
                 self=test_self,
                 planet=test_planet,
                 opponent=test_opponent,
-            ) in [True, False]
+            )
+            if response not in [True, False]:
+                raise ValueError(
+                    ERR_STRATEGY_SERVICE['must_return'].format(
+                        strategy.name, response))
+            return True
         # TODO: improve error notification eg: share lineno
         except TypeError as err:
-            logger.error('-' * 80)
-            logger.error(err, exc_info=True)
-            logger.error('-' * 80)
+            logger.error(err, exc_info=self.SHOW_TRACEBACK_VALIDATION)
+            return False
+        except ValueError as err:
+            logger.error(err, exc_info=self.SHOW_TRACEBACK_VALIDATION)
             return False
         except Exception as err:
-            logger.error('-' * 80)
-            logger.error(err, exc_info=True)
-            logger.error('-' * 80)
+            logger.error(err, exc_info=self.SHOW_TRACEBACK_VALIDATION)
             return False
         finally:
             # TODO: add to unit tests
