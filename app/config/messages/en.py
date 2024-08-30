@@ -5,3 +5,8 @@ ERR_SECURE_PROXY = {
     'methd_not_modify': "Cannot modify method: {0}",
     'not_secure_proxy': "Object '{0}' is not configurable as secure proxy.",
 }
+
+
+ERR_STRATEGY_SERVICE = {
+    'must_return': "Strategy '{0}' must return a boolean value, got {1}",
+}
