@@ -39,8 +39,6 @@ class StrategyService:
             planet: Planet,
             opponent: Civilization,
         ) -> bool:
-            if opponent.memory.is_ally(self.name):
-                opponent.memory
             return strategy(
                 opponent=opponent,
                 planet=planet,
