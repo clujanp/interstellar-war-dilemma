@@ -29,7 +29,7 @@ jobs:
     - name: Linter with pylint
       env:
         SRC_FOLDER: ${{ vars.SRC_FOLDER }}
-        TEST_FOLDER: ${{ vars.TESTS_FOLDER }}
+        TEST_FOLDER: ${{ vars.TESTS_UNIT_FOLDER }}
         PYLINT_SCORE: ${{ vars.PYLINT_SCORE }}
       run: |
         pylint ${SRC_FOLDER}/ ${TEST_FOLDER}/ --fail-under=${PYLINT_SCORE} --output-format=text > pylint_report.txt
