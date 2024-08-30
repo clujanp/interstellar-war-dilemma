@@ -47,7 +47,7 @@ class StrategyService:
                 memories=self.memory,
                 resources=self.resources,
             )
-            
+
         wrapper.name = strategy.__name__
         return wrapper
 
@@ -73,7 +73,6 @@ class StrategyService:
         test_self: Civilization,
         test_opponent: Civilization,
     ) -> bool:
-        # TODO: adjust for improves in mask_strategy
         try:
             response = strategy(
                 self=test_self,
