@@ -14,10 +14,16 @@ def get_gameplay_controller() -> GameplayController:
         PlanetUseCases, StrategiesUseCases, CivilizationUseCases,
         SkirmishUseCases, RoundUseCases, MemoriesUseCases
     )
+    from app.adapters.repositories.strategy.proxies import SecureProxyFactory
+    from app.config.secure_proxies import SECURITY_PROXY
+    from app.config.local_strategies_repository import REPO_CONFIG
 
     planet_service = PlanetService()
     civilization_service = CivilizationService()
-    strategy_service = StrategyService(StrategyRepository())
+
+    strategy_repo = StrategyRepository(**REPO_CONFIG)
+    strategy_proxy_factory = SecureProxyFactory(SECURITY_PROXY)
+    strategy_service = StrategyService(strategy_repo, strategy_proxy_factory)
 
     gameplay = GameplayController(
         starts='welcome',
