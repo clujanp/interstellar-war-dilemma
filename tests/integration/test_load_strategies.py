@@ -32,18 +32,14 @@ def test_load_strategies(
     logging.info(f"{strategies = }")
 
     # validate all errors are logged
-    expected_errors = [
-        (ValueError,
-         "Strategy 'test_fail1' must return a boolean value, got None",),
-        (TypeError,
-         "test_fail2() got an unexpected keyword argument 'opponent'",),
-    ]
-    for error_args, expected in zip(
-        mock_logger_error.call_args_list,
-        expected_errors
-    ):
-        assert isinstance(error_args[0][0], expected[0])
-        assert str(error_args[0][0]) == expected[1]
+    expected_errors = {
+        ValueError:
+            "Strategy 'test_fail1' must return a boolean value, got None",
+        TypeError:
+            "test_fail2() got an unexpected keyword argument 'opponent'",
+    }
+    for args, kwargs in mock_logger_error.call_args_list:
+        assert str(args[0]) == expected_errors[type(args[0])]
 
     assert all(
         name in expected_stratgies.keys()
