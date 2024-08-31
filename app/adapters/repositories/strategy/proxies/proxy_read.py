@@ -1,5 +1,6 @@
 from typing import List, Any
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
+from .exceptions import RestrictedAccessError
 
 
 class ReadableProxy:
@@ -14,6 +15,7 @@ class ReadableProxy:
                 return attr.fget(self._obj)
             value = getattr(self._obj, name)
             if callable(value):
-                raise AttributeError(ERR_MSG['not_acc_methd'].format(name))
+                raise RestrictedAccessError(
+                    ERR_MSG['not_acc_methd'].format(name))
             return value
-        raise AttributeError(ERR_MSG['acc_restric'].format(name))
+        raise RestrictedAccessError(ERR_MSG['acc_restric'].format(name))

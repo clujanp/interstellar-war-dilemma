@@ -10,6 +10,8 @@ from app.adapters.repositories.strategy.proxies.proxy_write import (
 from app.adapters.repositories.strategy.proxies.proxy_method import (
     MethodAccessibleProxy)
 from app.adapters.repositories.strategy.proxies.executer import SafeExecuter
+from app.adapters.repositories.strategy.proxies.exceptions import (
+    RestrictedAccessError, OverrideError)
 
 
 class TestSecureProxyFactoryTestCase(TestCase):
@@ -160,14 +162,14 @@ class TestReadableProxy(TestCase):
         assert result == 'prop_value'
 
     def test_getattr_non_readable_attr_fail(self):
-        with self.assertRaises(AttributeError) as context:
+        with self.assertRaises(RestrictedAccessError) as context:
             _ = self.proxy.non_readable_attr
         expected_message = ERR_MSG['acc_restric'].format('non_readable_attr')
         assert str(context.exception) == expected_message
 
     def test_getattr_callable_attr_fail(self):
         self.mock_obj.readable_attr = MagicMock()
-        with self.assertRaises(AttributeError) as context:
+        with self.assertRaises(RestrictedAccessError) as context:
             _ = self.proxy.readable_attr
         expected_message = ERR_MSG['not_acc_methd'].format('readable_attr')
         assert str(context.exception) == expected_message
@@ -184,7 +186,7 @@ class TestWritableProxy(TestCase):
         assert self.mock_obj.writable_attr == 'new_value'
 
     def test_setattr_non_writable_attr_fail(self):
-        with self.assertRaises(AttributeError) as context:
+        with self.assertRaises(OverrideError) as context:
             self.proxy.non_writable_attr = 'value'
         expected_message = ERR_MSG['not_modify'].format('non_writable_attr')
         assert str(context.exception) == expected_message
@@ -211,14 +213,14 @@ class TestWritableProxy(TestCase):
     def test_setattr_property_without_fset_fail(self):
         prop = property(fget=lambda x: 'value')
         type(self.mock_obj).writable_attr = prop
-        with self.assertRaises(AttributeError) as context:
+        with self.assertRaises(OverrideError) as context:
             self.proxy.writable_attr = 'new_value'
         expected_message = ERR_MSG['not_modify'].format('writable_attr')
         assert str(context.exception) == expected_message
 
     def test_setattr_callable_attr_fail(self):
         self.mock_obj.writable_attr = MagicMock()
-        with self.assertRaises(AttributeError) as context:
+        with self.assertRaises(OverrideError) as context:
             self.proxy.writable_attr = 'new_value'
         expected_message = ERR_MSG['methd_not_modify'].format('writable_attr')
         assert str(context.exception) == expected_message
@@ -242,7 +244,7 @@ class TestMethodAccessibleProxy(TestCase):
 
     def test_getattr_not_accessible_method_fail(self):
         proxy = MethodAccessibleProxy(self.obj, self.accessible_methods, None)
-        with self.assertRaises(AttributeError) as context:
+        with self.assertRaises(RestrictedAccessError) as context:
             proxy.restricted_method()
         expected_message = ERR_MSG['acc_restric'].format('restricted_method')
         assert str(context.exception) == expected_message

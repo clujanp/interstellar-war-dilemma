@@ -1,5 +1,6 @@
 from typing import List, Any
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
+from .exceptions import OverrideError
 
 
 class WritableProxy:
@@ -14,13 +15,13 @@ class WritableProxy:
             attr = getattr(self._obj.__class__, name, None)
             if isinstance(attr, property):
                 if attr.fset is None:
-                    raise AttributeError(ERR_MSG['not_modify'].format(name))
+                    raise OverrideError(ERR_MSG['not_modify'].format(name))
                 attr.fset(self._obj, value)
             else:
                 actual = getattr(self._obj, name)
                 if callable(actual):
-                    raise AttributeError(
+                    raise OverrideError(
                         ERR_MSG['methd_not_modify'].format(name))
                 setattr(self._obj, name, value)
         else:
-            raise AttributeError(ERR_MSG['not_modify'].format(name))
+            raise OverrideError(ERR_MSG['not_modify'].format(name))

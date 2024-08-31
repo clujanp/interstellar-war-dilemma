@@ -1,5 +1,6 @@
 from typing import List, Callable
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
+from .exceptions import RestrictedAccessError
 
 
 class MethodAccessibleProxy:
@@ -19,4 +20,4 @@ class MethodAccessibleProxy:
                 return getattr(self._obj, name)
             return self._method_wrapper(getattr(self._obj, name))
         else:
-            raise AttributeError(ERR_MSG['acc_restric'].format(name))
+            raise RestrictedAccessError(ERR_MSG['acc_restric'].format(name))
