@@ -5,6 +5,8 @@ from pytest_mock import MockerFixture
 from app.config.injection_dependency import (
     get_gameplay_controller, GameplayController)
 from app.config.local_strategies_repository import REPO_CONFIG
+from app.adapters.repositories.strategy.proxies.exceptions import (
+    OverrideError, RestrictedAccessError)
 
 
 @fixture
@@ -37,6 +39,10 @@ def test_load_strategies(
             "Strategy 'test_fail1' must return a boolean value, got None",
         TypeError:
             "test_fail2() got an unexpected keyword argument 'opponent'",
+        RestrictedAccessError:
+            "Access to 'memory' is restricted.",
+        OverrideError:
+            "Cannot modify attribute: memory",
     }
     for args, kwargs in mock_logger_error.call_args_list:
         assert str(args[0]) == expected_errors[type(args[0])]

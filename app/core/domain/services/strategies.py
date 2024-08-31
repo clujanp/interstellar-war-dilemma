@@ -34,6 +34,8 @@ class StrategyService:
                 resources: int
             ) -> bool: COOPERATION | AGGRESSION
         """
+        mask = self._mask_execution_entities
+
         def wrapper(
             self: Civilization,
             planet: Planet,
@@ -42,7 +44,7 @@ class StrategyService:
             return strategy(
                 opponent=opponent,
                 planet=planet,
-                memories=self.memory,
+                memories=memories,
                 resources=self.resources,
             )
 

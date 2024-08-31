@@ -12,8 +12,9 @@ class TestStrategyService(TestCase):
         self.civ1 = MagicMock(name="Self")
         self.civ2 = MagicMock(name="TestOpponent")
         self.planet = MagicMock(name="TestPlanet", cost=Cost.HIGH)
+        self.proxy_factory = MagicMock(side_effect=lambda x: x)
         self.service = StrategyService(
-            repository=MagicMock(), proxy_factory=MagicMock())
+            repository=MagicMock(), proxy_factory=self.proxy_factory)
 
     def test_load_strategies(self):
         self.service.repository.load_strategies.return_value = {
@@ -29,6 +30,11 @@ class TestStrategyService(TestCase):
             memories=self.civ1.memory,
             resources=self.civ1.resources,
         )
+        assert self.proxy_factory.call_args_list == [
+            call(self.civ2),
+            call(self.planet),
+            call(self.civ1.memory),
+        ]
 
     def test_mask_execution_entities(self):
         proxies = [MagicMock(), MagicMock(), MagicMock()]
