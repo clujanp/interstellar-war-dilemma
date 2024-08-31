@@ -41,6 +41,7 @@ class StrategyService:
             planet: Planet,
             opponent: Civilization,
         ) -> bool:
+            opponent, planet, memories = mask(opponent, planet, self.memory)
             return strategy(
                 opponent=opponent,
                 planet=planet,
