@@ -10,7 +10,7 @@ class Score(int):
             "Invalid score value")
         return super().__new__(cls, value)
 
-    def __repr__(self): return str(self)
+    def __repr__(self): return f"Score: {super().__repr__()}"
 
 
 class Cost:
