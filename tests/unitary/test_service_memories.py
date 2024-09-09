@@ -1,7 +1,8 @@
 import init  # noqa: F401
 from unittest import TestCase
 from unittest.mock import MagicMock, patch, PropertyMock
-from app.core.domain.models import Score, Position, Result, Skirmish
+from app.core.domain.models import (
+    Score, Position, Result, Skirmish, Planet, Civilization)
 from app.core.domain.services import MemoriesServiceWrapper
 
 
@@ -20,7 +21,7 @@ class TestModelMemories(TestCase):
             self.civilization_1: [(Position.COOPERATION, Score.LOSE,)],
             self.civilization_2: [(Position.AGGRESSION, Score.WIN,)],
         }
-        self.memories = MagicMock(name='memories', owner=None)
+        self.memories = MagicMock(name='memories', owner=None, owner_data={})
         self.memories.skirmishes.return_value = self.skirmishes
         self.memories.memories_ = [1, 2]
         self.memory_wrapped = MemoriesServiceWrapper(self.memories)
@@ -39,6 +40,24 @@ class TestModelMemories(TestCase):
 
     def test_length_success(self):
         assert self.memory_wrapped.length == 2
+
+    def test_own_info_success(self):
+        assert self.memory_wrapped.own_info == self.memories.owner_data
+        test_value = {
+            'str': 'value',
+            'int': 1,
+            'float': 1.1,
+            'bool': True,
+            'none': None,
+            'planet': Planet(name='planet', cost=100),
+            'civilzation': Civilization(
+                name='civilization', strategy=lambda: True, resources=100),
+            'to_filter': Score(0)
+        }
+        self.memory_wrapped.own_info = test_value
+        expected = test_value
+        del expected['to_filter']
+        assert expected == self.memory_wrapped.own_info
 
     def test_remembers_success(self):
         skirmish = MagicMock()
