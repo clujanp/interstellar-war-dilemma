@@ -96,6 +96,10 @@ class Round(Entity):
 class Memories(Entity, MemoriesValidations):
     owner: Optional[Civilization]
     memories_: List[Skirmish] = Field(default_factory=list)
+    owner_data: Dict[
+        str,
+        Optional[Planet | Civilization | str | int | float | bool]
+    ] = Field(default_factory=dict)
 
     def add(self, skirmish: Skirmish) -> None:
         self.memories_.append(skirmish)
