@@ -1,5 +1,4 @@
 import init  # noqa: F401
-import logging
 from pytest import fixture
 from pytest_mock import MockerFixture
 from app.config.injection_dependency import (
@@ -31,7 +30,6 @@ def test_load_strategies(
         'test01': test01,
     }
     strategies = strategies_use_cases.load_strategies()
-    logging.info(f"{strategies = }")
 
     # validate all errors are logged
     expected_errors = {
@@ -40,7 +38,7 @@ def test_load_strategies(
         TypeError:
             "test_fail2() got an unexpected keyword argument 'opponent'",
         RestrictedAccessError:
-            "Access to 'memory' is restricted.",
+            "Access to 'memory' is restricted",
         OverrideError:
             "Cannot modify attribute: memory",
     }
