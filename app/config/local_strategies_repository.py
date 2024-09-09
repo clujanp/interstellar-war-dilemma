@@ -8,6 +8,10 @@ REPO_CONFIG = {
         'always_cooperation': BuiltInStrategies.always_cooperation,
         'always_aggression': BuiltInStrategies.always_aggression,
         'random': BuiltInStrategies.random,
-        'reply_last': BuiltInStrategies.reply_last,
+        'tic_for_tac': BuiltInStrategies.tic_for_tac,
+        'friedman': BuiltInStrategies.friedman,
+        'joss': BuiltInStrategies.joss,
+        'sample': BuiltInStrategies.sample,
+        'tester': BuiltInStrategies.tester,
     }
 }
