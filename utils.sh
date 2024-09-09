@@ -31,6 +31,8 @@ set_env() {
         env="dev"
     elif [[ "$2" == "default-set-none" && "$1" != --env:* ]]; then
         env="none"
+    elif [ "$1" == "default-set-none" ]; then
+        env="dev"
     else
         echo "enviroment $1 is no available"
         exit 1
@@ -142,6 +144,17 @@ test_log() {
     fi
 }
 
+# Run tests with logs
+test_debug() {
+    clear
+    venv_activate
+    if [ -n "$@" ]; then
+        pytest -o log_cli=true -vv --tb=short $TEST_UNITARY_PATH/ "$@" --trace
+    else
+        pytest -o log_cli=true -vv --tb=short --cov=$SRC_FOLDER/ $TEST_UNITARY_PATH/ --cov-fail-under=$COV_PERCENT --trace
+    fi
+}
+
 # Run lint
 lint() {
     venv_activate
@@ -169,6 +182,7 @@ lint_report() {
 # Clean compiled files
 clean() {
     find $SRC_FOLDER -name '*.pyc' -delete
+    find $SRC_FOLDER -name '*,cover' -delete
     find $SRC_FOLDER -name '__pycache__' -type d -exec rm -r {} +
 }
 
@@ -212,6 +226,7 @@ help() {
     echo "    tests                                     Run all tests unitary and integration"
     echo "    unit [test.py]                            Run unitary tests"
     echo "    unit -log [test.py]                       Run unitary tests with logs"
+    echo "    unit -debug [test.py]                     Run unitary tests as DEBUG mode"
     echo "    integration                               Run integration tests"
     echo "    cov                                       Run tests with coverage"
     echo "    lint                                      Run lint"
@@ -360,6 +375,17 @@ case "$1" in
                     shift 3
                 fi
                 test_log "$@"
+                ;;
+            -debug)
+                set_env $3 "default-set-none"
+                # when enviro is set by default
+                if [ $env == "none" ]; then
+                    env="dev"
+                    shift 2
+                else
+                    shift 3
+                fi
+                test_debug "$@"
                 ;;
             *)
                 env="dev"
