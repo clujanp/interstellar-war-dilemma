@@ -118,7 +118,7 @@ cov() {
 # Run tests with coverage
 integration() {
     venv_activate
-    pytest $TEST_INTEGRATION_PATH
+    pytest -vv --tb=short $TEST_INTEGRATION_PATH
 }
 
 # Run tests
