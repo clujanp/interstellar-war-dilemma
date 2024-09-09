@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 
 # value objects
@@ -37,19 +37,45 @@ class Civilization:
 
 class Memories:
     length: int
+    own_info: Dict[
+        str, Optional[Planet | Civilization | str | int | float | bool]]
 
     def civilizations(self) -> List[Civilization]: ...
     opponents = civilizations
 
     def skirmishes_count(self, civilization: Civilization) -> int: ...
 
-    def last_position(
+    def first_position(
+        self, civilization: Civilization, n: int = 1
+    ) -> Optional[
+        Position.COOPERATION | Position.AGGRESSION
+    ] | List[
+        Position.COOPERATION | Position.AGGRESSION
+    ]: ...
+
+    def first_score(
         self, civilization: Civilization
-    ) -> Optional[Position.COOPERATION | Position.AGGRESSION]: ...
+    ) -> Optional[
+        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
+    ] | List[
+        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
+    ]: ...
+
+    def last_position(
+        self, civilization: Civilization, n: int = 1
+    ) -> Optional[
+        Position.COOPERATION | Position.AGGRESSION
+    ] | List[
+        Position.COOPERATION | Position.AGGRESSION
+    ]: ...
 
     def last_score(
         self, civilization: Civilization
-    ) -> Optional[Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD]: ...
+    ) -> Optional[
+        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
+    ] | List[
+        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
+    ]: ...
 
     def cooperations(self, civilization: Civilization) -> Statistic: ...
     def aggressions(self, civilization: Civilization) -> Statistic: ...
