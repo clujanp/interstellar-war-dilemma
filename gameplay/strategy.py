@@ -1,6 +1,5 @@
 from random import choice, random
 from .classes import Civilization, Memories, Position
-from app.infraestructure.logging import logger
 
 
 class BuiltInStrategies:
@@ -68,20 +67,3 @@ class BuiltInStrategies:
             else:
                 return Position.COOPERATION
         return Position.COOPERATION
-
-
-def config(**configs: dict) -> callable:
-    AVAILABLE_CONFIGS = {
-        'allies': list
-    }
-
-    assert all(config in AVAILABLE_CONFIGS for config in configs), (
-        f"Invalid config: {configs}, must be one of {AVAILABLE_CONFIGS}")
-    for config, value in configs.items():
-        assert isinstance(value, AVAILABLE_CONFIGS[config]), (
-            f"Invalid value for {config}, must be {AVAILABLE_CONFIGS[config]}")
-
-    def decorator(strategy: callable) -> callable:
-        setattr(strategy, 'config', configs)
-        return strategy
-    return decorator
