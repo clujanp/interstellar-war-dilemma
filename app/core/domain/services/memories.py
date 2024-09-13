@@ -100,6 +100,9 @@ class MemoriesServiceWrapper:
     def mistakes(self, civilization: Civilization) -> Statistic:
         return self._statistics(civilization, Result.is_mistake)
 
+    def fails(self, civilization: Civilization) -> Statistic:
+        return self._statistics(civilization, Result.is_failure)
+
     def score(self, civilization: Civilization) -> int:
         return sum([
             score

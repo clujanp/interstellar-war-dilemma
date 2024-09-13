@@ -152,6 +152,15 @@ class TestModelMemories(TestCase):
             self.civilization_1, Result.is_mistake)
         assert mock_statiscs_method.return_value == response
 
+    @patch(
+        'app.core.domain.services.memories.MemoriesServiceWrapper._statistics'
+    )
+    def test_fails(self, mock_statiscs_method: MagicMock):
+        response = self.memory_wrapped.fails(self.civilization_1)
+        mock_statiscs_method.assert_called_once_with(
+            self.civilization_1, Result.is_failure)
+        assert mock_statiscs_method.return_value == response
+
     def test_score(self):
         self.memories.skirmishes_by_civilization.return_value = {
             self.civilization_1: [
