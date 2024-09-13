@@ -1,6 +1,5 @@
 from typing import List, Optional
 from app.infraestructure.screens import Screen
-from app.infraestructure.logging import logger
 
 
 class GameplayController:
@@ -21,7 +20,6 @@ class GameplayController:
                 break
             self.next, self.args = self.screen.prompt(
                 scenario.prompt or self.screen.DEFAULT_PROMPT)
-            logger.warn(f"{self.next = } {self.args = }")
 
     def get_scenario(self) -> callable:
         scenario = self._scenarios.get(self.next, None)
