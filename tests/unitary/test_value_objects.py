@@ -18,11 +18,13 @@ class TestPosition(TestCase):
     def test_position_constants(self):
         assert Position.COOPERATION is True
         assert Position.AGGRESSION is False
+        assert Position.FAIL is None
 
 
 class TestResult(TestCase):
     def setUp(self):
-        self.positions = [Position.COOPERATION, Position.AGGRESSION]
+        self.positions = [
+            Position.COOPERATION, Position.AGGRESSION, Position.FAIL]
         self.scores = [Score.LOSE, Score.TIE_BAD, Score.TIE_GOOD, Score.WIN]
 
     def test_was_cooperative(self):
@@ -66,6 +68,15 @@ class TestResult(TestCase):
             for score in self.scores:
                 result = Result.is_mistake(posture, score)
                 if score in [Score.LOSE]:
+                    assert result is True
+                else:
+                    assert result is False
+
+    def test_is_failure(self):
+        for posture in self.positions:
+            for score in self.scores:
+                result = Result.is_failure(posture, score)
+                if posture is Position.FAIL:
                     assert result is True
                 else:
                     assert result is False

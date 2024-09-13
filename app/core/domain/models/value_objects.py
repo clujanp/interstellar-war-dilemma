@@ -23,6 +23,7 @@ class Cost:
 class Position:
     COOPERATION = True
     AGGRESSION = False
+    FAIL = None
 
 
 class Result:
@@ -38,6 +39,7 @@ class Result:
     is_lose = (  # noqa: E731
         lambda posture, score: score in [Score.LOSE, Score.TIE_BAD])
     is_mistake = lambda posture, score: score == Score.LOSE  # noqa: E731
+    is_failure = lambda posture, score: posture == Position.FAIL  # noqa: E731
 
 
 class Statistic(int):
