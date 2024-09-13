@@ -55,7 +55,7 @@ class TestSkirmishService(TestCase):
         score_1 = MagicMock()
         score_2 = MagicMock()
         mock_decide_winner.return_value = (
-            [self.civilization_1, self.civilization_2], score_1, score_2)
+            (self.civilization_1, self.civilization_2,), score_1, score_2)
         result = SkirmishService.resolve(skirmish)
 
         skirmish.civilization_1.strategy.assert_called_once_with(
@@ -68,10 +68,9 @@ class TestSkirmishService(TestCase):
             planet=skirmish.planet,
             opponent=skirmish.civilization_1
         )
-        mock_decide_winner.assert_called_once_with(
-            skirmish, Score.TIE_GOOD, Score.TIE_GOOD)
+        mock_decide_winner.assert_called_once_with(skirmish)
         assert result == (
-            [self.civilization_1, self.civilization_2], score_1, score_2)
+            (self.civilization_1, self.civilization_2,), score_1, score_2)
 
     @patch('app.core.domain.services.skirmish.SkirmishService._decide_winner')
     def test_resolve_skirmish_tie_bad_success(self, mock_decide_winner):
@@ -81,7 +80,7 @@ class TestSkirmishService(TestCase):
         score_1 = MagicMock()
         score_2 = MagicMock()
         mock_decide_winner.return_value = (
-            [self.civilization_1, self.civilization_2], score_1, score_2)
+            (self.civilization_1, self.civilization_2,), score_1, score_2)
         result = SkirmishService.resolve(skirmish)
 
         skirmish.civilization_1.strategy.assert_called_once_with(
@@ -94,10 +93,9 @@ class TestSkirmishService(TestCase):
             planet=skirmish.planet,
             opponent=skirmish.civilization_1
         )
-        mock_decide_winner.assert_called_once_with(
-            skirmish, Score.TIE_BAD, Score.TIE_BAD)
+        mock_decide_winner.assert_called_once_with(skirmish)
         assert result == (
-            [self.civilization_1, self.civilization_2], score_1, score_2)
+            (self.civilization_1, self.civilization_2,), score_1, score_2)
 
     @patch('app.core.domain.services.skirmish.SkirmishService._decide_winner')
     def test_resolve_skirmish_first_win_success(self, mock_decide_winner):
@@ -107,7 +105,7 @@ class TestSkirmishService(TestCase):
         score_1 = MagicMock()
         score_2 = MagicMock()
         mock_decide_winner.return_value = (
-            [self.civilization_1, self.civilization_2], score_1, score_2)
+            (self.civilization_1, self.civilization_2,), score_1, score_2)
         result = SkirmishService.resolve(skirmish)
 
         skirmish.civilization_1.strategy.assert_called_once_with(
@@ -120,10 +118,9 @@ class TestSkirmishService(TestCase):
             planet=skirmish.planet,
             opponent=skirmish.civilization_1
         )
-        mock_decide_winner.assert_called_once_with(
-            skirmish, Score.WIN, Score.LOSE)
+        mock_decide_winner.assert_called_once_with(skirmish)
         assert result == (
-            [self.civilization_1, self.civilization_2], score_1, score_2)
+            (self.civilization_1, self.civilization_2,), score_1, score_2)
 
     @patch('app.core.domain.services.skirmish.SkirmishService._decide_winner')
     def test_resolve_skirmish_second_win_success(self, mock_decide_winner):
@@ -133,7 +130,7 @@ class TestSkirmishService(TestCase):
         score_1 = MagicMock()
         score_2 = MagicMock()
         mock_decide_winner.return_value = (
-            [self.civilization_1, self.civilization_2], score_1, score_2)
+            (self.civilization_1, self.civilization_2,), score_1, score_2)
         result = SkirmishService.resolve(skirmish)
 
         skirmish.civilization_1.strategy.assert_called_once_with(
@@ -146,67 +143,84 @@ class TestSkirmishService(TestCase):
             planet=skirmish.planet,
             opponent=skirmish.civilization_1
         )
-        mock_decide_winner.assert_called_once_with(
-            skirmish, Score.LOSE, Score.WIN)
+        mock_decide_winner.assert_called_once_with(skirmish)
         assert result == (
-            [self.civilization_1, self.civilization_2], score_1, score_2)
+            (self.civilization_1, self.civilization_2,), score_1, score_2)
 
-    def test_decide_winner_tie_good_success(self):
-        skirmish = MagicMock()
-        result = SkirmishService._decide_winner(
-            skirmish, Score.TIE_GOOD, Score.TIE_GOOD)
-        assert result == (
-            [skirmish.civilization_1, skirmish.civilization_2],
-            Score.TIE_GOOD,
-            Score.TIE_GOOD
+    @patch('app.core.domain.services.skirmish.SkirmishService._decide_winner')
+    def test_resolve_skirmish_fail_and_aggression_success(
+        self, mock_decide_winner
+    ):
+        skirmish = MagicMock(winner_=None)
+        skirmish.civilization_1.strategy.return_value = Position.FAIL
+        skirmish.civilization_2.strategy.return_value = Position.AGGRESSION
+        score_1 = MagicMock()
+        score_2 = MagicMock()
+        mock_decide_winner.return_value = (
+            (self.civilization_2,), score_1, score_2)
+        result = SkirmishService.resolve(skirmish)
+
+        skirmish.civilization_1.strategy.assert_called_once_with(
+            self=skirmish.civilization_1,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_2
         )
+        skirmish.civilization_2.strategy.assert_called_once_with(
+            self=skirmish.civilization_2,
+            planet=skirmish.planet,
+            opponent=skirmish.civilization_1
+        )
+        mock_decide_winner.assert_called_once_with(skirmish)
+        assert result == (
+            (self.civilization_2,), score_1, score_2)
+
+    @patch('app.core.domain.services.skirmish.SkirmishService.RESOLUTER')
+    def test_decide_winner_success(self, mock_choises: MagicMock):
+        skirmish = MagicMock(posture_1='a', posture_2='b')
+        mock_choises.get.return_value = MagicMock(
+            return_value=(
+                (skirmish.civilization_1, skirmish.civilization_2,),
+                Score.TIE_GOOD,
+                Score.TIE_GOOD,
+            ))
+        result = SkirmishService._decide_winner(skirmish)
+        assert mock_choises.get.return_value.return_value == result
+        mock_choises.get.assert_called_once_with(('a', 'b'))
+        mock_choises.get.return_value.assert_called_once_with(
+            skirmish.civilization_1, skirmish.civilization_2)
         assert skirmish.score_1 == Score.TIE_GOOD
         assert skirmish.score_2 == Score.TIE_GOOD
-        assert skirmish.winner_ == [
-            skirmish.civilization_1, skirmish.civilization_2]
-        assert skirmish.planet.colonizer == [
-            skirmish.civilization_1, skirmish.civilization_2]
+        assert skirmish.winner_ == (
+            skirmish.civilization_1, skirmish.civilization_2,)
+        assert skirmish.planet.colonizer == (
+            skirmish.civilization_1, skirmish.civilization_2,)
 
-    def test_decide_winner_tie_bad_success(self):
-        skirmish = MagicMock()
-        result = SkirmishService._decide_winner(
-            skirmish, Score.TIE_BAD, Score.TIE_BAD)
-        assert result == (
-            [skirmish.civilization_1, skirmish.civilization_2],
-            Score.TIE_BAD,
-            Score.TIE_BAD
+    def test_resoluter_success(self):
+        COO, AGR, FAIL = (
+            Position.COOPERATION, Position.AGGRESSION, Position.FAIL)
+        WIN, LOSE, TIE_GOOD, TIE_BAD, MAX = (
+            Score.WIN, Score.LOSE, Score.TIE_GOOD, Score.TIE_BAD,
+            Score.MAX_SCORE
         )
-        assert skirmish.score_1 == Score.TIE_BAD
-        assert skirmish.score_2 == Score.TIE_BAD
-        assert skirmish.winner_ == [
-            skirmish.civilization_1, skirmish.civilization_2]
-        assert skirmish.planet.colonizer == [
-            skirmish.civilization_1, skirmish.civilization_2]
+        resoluter = SkirmishService.RESOLUTER
+        civ1, civ2 = self.civilization_1, self.civilization_2
 
-    def test_decide_winner_first_win_success(self):
-        skirmish = MagicMock()
-        result = SkirmishService._decide_winner(
-            skirmish, Score.WIN, Score.LOSE)
-        assert result == (
-            [skirmish.civilization_1],
-            Score.WIN,
-            Score.LOSE
-        )
-        assert skirmish.score_1 == Score.WIN
-        assert skirmish.score_2 == Score.LOSE
-        assert skirmish.winner_ == [skirmish.civilization_1]
-        assert skirmish.planet.colonizer == [skirmish.civilization_1]
-
-    def test_decide_winner_second_win_success(self):
-        skirmish = MagicMock()
-        result = SkirmishService._decide_winner(
-            skirmish, Score.LOSE, Score.WIN)
-        assert result == (
-            [skirmish.civilization_2],
-            Score.LOSE,
-            Score.WIN
-        )
-        assert skirmish.score_1 == Score.LOSE
-        assert skirmish.score_2 == Score.WIN
-        assert skirmish.winner_ == [skirmish.civilization_2]
-        assert skirmish.planet.colonizer == [skirmish.civilization_2]
+        assert ((civ1, civ2,), TIE_GOOD, TIE_GOOD) == resoluter.get(
+            (COO, COO,))(civ1, civ2)
+        assert ((civ1, civ2,), TIE_BAD, TIE_BAD) == resoluter.get(
+            (AGR, AGR,))(civ1, civ2)
+        assert ((civ2,), LOSE, WIN) == resoluter.get(
+            (COO, AGR,))(civ1, civ2)
+        assert ((civ1,), WIN, LOSE) == resoluter.get(
+            (AGR, COO,))(civ1, civ2)
+        # fail cases
+        assert ((civ2,), LOSE, TIE_GOOD) == resoluter.get(
+            (FAIL, COO,))(civ1, civ2)
+        assert ((civ1,), TIE_GOOD, LOSE) == resoluter.get(
+            (COO, FAIL,))(civ1, civ2)
+        assert ((civ2,), LOSE, MAX) == resoluter.get(
+            (FAIL, AGR,))(civ1, civ2)
+        assert ((civ1,), MAX, LOSE) == resoluter.get(
+            (AGR, FAIL,))(civ1, civ2)
+        assert (tuple(), LOSE, LOSE) == resoluter.get(
+            (FAIL, FAIL,))(civ1, civ2)
