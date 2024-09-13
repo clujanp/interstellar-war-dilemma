@@ -28,3 +28,13 @@ ERR_MODELS_VALIDATIONS = {
         "Los valores de los datos del propietario deben ser int, float, str, "
         "bool, Civilization, Planet o None",
 }
+
+ERR_LOCAL_REPOSITORY_STRATEGY = {
+    'warning_more_than_one': "Se encontraron más de una estrategia en {0}",
+    'debug_loaded': "Estrategias cargadas: {0}",
+}
+
+
+ERR_SKIRMISH_SERVICE = {
+    'already_resolved': "Escaramuza ya resuelta",
+}

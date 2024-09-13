@@ -23,3 +23,13 @@ ERR_MODELS_VALIDATIONS = {
         "Owner data values must be int, float, str, bool, Civilization, "
         "Planet or None",
 }
+
+ERR_LOCAL_REPOSITORY_STRATEGY = {
+    'warning_more_than_one': "More than one strategy found in {0}",
+    'debug_loaded': "Loaded strategies: {0}",
+}
+
+
+ERR_SKIRMISH_SERVICE = {
+    'already_resolved': "Skirmish already resolved",
+}

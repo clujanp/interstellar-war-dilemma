@@ -25,7 +25,7 @@ class SkirmishService:
         cls, skirmish: Skirmish
     ) -> Tuple[List[Civilization], Score, Score]:
         if skirmish.winner_ is not None:
-            raise ValueError("Skirmish already resolved")
+            raise ValueError(ERR_MSG['already_resolved'])
 
         planet = skirmish.planet
         civilization_1 = skirmish.civilization_1

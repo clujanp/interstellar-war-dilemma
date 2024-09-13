@@ -2,6 +2,7 @@ from random import choice
 from typing import List, Dict
 from app.core.interfaces.repositories.strategies import StrategyRepository
 from app.infraestructure.logging import logger
+from app.config.messages import ERR_LOCAL_REPOSITORY_STRATEGY as ERR_MSG
 
 
 class LocalStrategyRepository(StrategyRepository):
@@ -39,8 +40,7 @@ class LocalStrategyRepository(StrategyRepository):
                 name: func for name, func in found_functions.items()
                 # when function from the same package of module
                 if getmodule(func).__package__ == module.__package__
-            })
-        logger.debug(f"Loaded strategies: {functions}")
+        logger.debug(ERR_MSG['debug_loaded'].format(functions))
         return functions
 
     def _map_strategy_modules(self) -> List[str]:
