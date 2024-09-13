@@ -133,6 +133,11 @@ class TestModelSkirmish(TestCase):
         self.skirmish.winner_ = None
         assert "Skirmish in 'TestPlanet' is disputing" == str(self.skirmish)
 
+    def test_str_fail_success(self):
+        self.skirmish.winner_ = []
+        assert (
+            "Skirmish in 'TestPlanet' is fail for both" == str(self.skirmish))
+
 
 class TestModelRound(TestCase):
     def setUp(self):

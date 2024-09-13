@@ -81,6 +81,8 @@ class Skirmish(Entity, SkirmishValidations):
     def __str__(self):
         if self.winner_ is None:
             return f"Skirmish in '{self.planet.name}' is disputing"
+        if self.winner_ == []:
+            return f"Skirmish in '{self.planet.name}' is fail for both"
         winners = ', '.join([c.name for c in self.winner_])
         return f"Skirmish in '{self.planet.name}' with winner {winners}"
 
