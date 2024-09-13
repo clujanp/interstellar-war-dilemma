@@ -22,7 +22,7 @@ class Score(int):
 
 
 class Statistic(int):
-    percent: float
+    percent: float  # 0.0 to 1.0
 
 
 # entities
@@ -83,3 +83,4 @@ class Memories:
     def hits(self, civilization: Civilization) -> Statistic: ...
     def loss(self, civilization: Civilization) -> Statistic: ...
     def mistakes(self, civilization: Civilization) -> Statistic: ...
+    def fails(self, civilization: Civilization) -> Statistic: ...
