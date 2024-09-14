@@ -25,31 +25,7 @@ def caster(type: Union[type, Tuple[type]]) -> callable:
 
 
 def cached(func):
-    @lru_cache(maxsize=None)
+    @lru_cache(maxsize=None, typed=True)
     def cached_method(self, *args, **kwargs):
         return func(self, *args, **kwargs)
-
-    @wraps(func)
-    def wrapper(self, *args, **kwargs):
-        return cached_method(self, *args, **kwargs)
-
-    wrapper.cache_clear = cached_method.cache_clear
-    return wrapper
-
-
-def restrict_access(allowed_contexts: list) -> callable:
-    def decorator(func: callable) -> callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs) -> any:
-            context = kwargs.pop('context', None)
-            if context is None:
-                raise ValueError(
-                    "Context permissions must be passed as a keyword argument")
-            if context not in allowed_contexts:
-                raise PermissionError(
-                    f"Access to {func.__name__} is restricted "
-                    "in the current context."
-                )
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+    return cached_method
