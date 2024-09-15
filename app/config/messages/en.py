@@ -4,6 +4,8 @@ ERR_SECURE_PROXY = {
     'not_modify': "Cannot modify attribute: {0}",
     'methd_not_modify': "Cannot modify method: {0}",
     'not_secure_proxy': "Object '{0}' is not configurable as secure proxy",
+    'debug_secure_proxy': "Secure proxy created for {0}",
+    'debug_metd_warps': "Method {0} of {1} wrapped",
 }
 
 
