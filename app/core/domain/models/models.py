@@ -162,7 +162,7 @@ class Memories(Entity, MemoriesValidations):
         owner = ""
         if self.owner is not None:
             owner = f"{self.owner.name}'s "
-        return f"{owner} memories of {len(self.memories_)} skirmishes"
+        return f"{owner}Memories of {len(self.memories_)} skirmishes"
 
     def __repr__(self):
         return f"<Memories: {self.owner}>"

@@ -20,8 +20,8 @@ class TestBaseModel(TestCase):
 
     def test_repr_function_success(self):
         expected_repr = (
-            f"{self.instance.__class__.__name__}: "
-            f"{str(self.instance.uid)[-3:]}"
+            f"<{self.instance.__class__.__name__}: "
+            f"{str(self.instance.uid)[-3:]}>"
         )
         assert repr(self.instance) == expected_repr
 

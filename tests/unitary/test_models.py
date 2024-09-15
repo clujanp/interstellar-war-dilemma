@@ -27,7 +27,7 @@ class TestModelPlanet(TestCase):
         assert "TestPlanet is colonized by '<nobody>'" == str(self.planet)
 
     def test_repr_success(self):
-        assert "Planet: TestPlanet" == repr(self.planet)
+        assert "<Planet: TestPlanet>" == repr(self.planet)
 
     def test_str_colonizer_success(self):
         self.planet.colonizer = [self.civilization]
@@ -46,10 +46,10 @@ class TestModelCivilization(TestCase):
         assert self.civilization.memory.owner is None
 
     def test_str_success(self):
-        assert "TestCiv has 10 resources" == str(self.civilization)
+        assert "TestCiv" == str(self.civilization)
 
     def test_repr_success(self):
-        assert "Civilization: TestCiv" == repr(self.civilization)
+        assert "<Civilization: TestCiv>" == repr(self.civilization)
 
 
 class TestModelSkirmish(TestCase):
@@ -137,6 +137,12 @@ class TestModelSkirmish(TestCase):
         self.skirmish.winner_ = []
         assert (
             "Skirmish in 'TestPlanet' is fail for both" == str(self.skirmish))
+
+    def test_repr_success(self):
+        assert (
+            "<Skirmish: between Civ1 and Civ2 in TestPlanet>"
+            == repr(self.skirmish)
+        )
 
 
 class TestModelRound(TestCase):
