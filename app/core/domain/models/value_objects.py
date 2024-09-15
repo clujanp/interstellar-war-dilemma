@@ -10,7 +10,8 @@ class Score(int):
             "Invalid score value")
         return super().__new__(cls, value)
 
-    def __repr__(self): return f"Score: {super().__repr__()}"
+    def __str__(self): return super().__repr__()
+    def __repr__(self): return f"<Score: {self}>"
 
 
 class Cost:
@@ -23,13 +24,14 @@ class Cost:
 class Position:
     COOPERATION = True
     AGGRESSION = False
-    FAIL = None
+    FAIL = None  # fail in take a decision (raise an exception or return None)
 
 
 class Result:
-    COOPERATION = 1
-    CONQUEST = 0
-    AGGRESSION = -1
+    COOPERATION = 1  # both cooperated
+    CONQUEST = 0  # one cooperated and the other not
+    AGGRESSION = -1  # both aggressed
+    FAIL = -5  # both failed in take a decision
 
     was_cooperative = (  # noqa: E731
         lambda posture, score: posture is Position.COOPERATION)
@@ -57,3 +59,8 @@ class Statistic(int):
         if self.total == 0:
             return 0.0
         return self / self.total
+
+    def __str__(self): return super().__repr__()
+
+    def __repr__(self):
+        return f"<Statistic: {self.percent:.2f}>"

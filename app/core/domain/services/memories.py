@@ -173,3 +173,6 @@ class MemoriesServiceWrapper:
             1 for posture, score in self._skirmishes(civilization)
             if rule(posture, score)
         ]), total=self.skirmishes_count(civilization))
+
+    def __repr__(self) -> str:
+        return f"<Memories owner={self.owner}>"

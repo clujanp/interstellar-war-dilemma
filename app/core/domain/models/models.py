@@ -27,7 +27,7 @@ class Planet(Entity, PlanetValidations):
         return f"{self.name} is colonized by '{self.colonizer_name}'"
 
     def __repr__(self):
-        return f"Planet: {self.name}"
+        return f"<Planet: {self.name}>"
 
 
 class Civilization(Entity, CivilizationValidations):
@@ -37,10 +37,10 @@ class Civilization(Entity, CivilizationValidations):
     memory: 'Memories' = Field(default_factory=lambda: Memories(owner=None))
 
     def __str__(self):
-        return f"{self.name} has {self.resources} resources"
+        return f"{self.name}"
 
     def __repr__(self):
-        return f"Civilization: {self.name}"
+        return f"<Civilization: {self.name}>"
 
 
 class Skirmish(Entity, SkirmishValidations):
@@ -86,6 +86,12 @@ class Skirmish(Entity, SkirmishValidations):
         winners = ', '.join([c.name for c in self.winner_])
         return f"Skirmish in '{self.planet.name}' with winner {winners}"
 
+    def __repr__(self):
+        return (
+            f"<Skirmish: between {self.civilization_1.name} "
+            f"and {self.civilization_2.name} in {self.planet.name}>"
+        )
+
 
 class Round(Entity):
     number: int
@@ -93,6 +99,9 @@ class Round(Entity):
 
     def __str__(self):
         return f"Round #{self.number} with {len(self.skirmishes)} skirmishes"
+
+    def __repr__(self):
+        return f"<Round: {self.number}>"
 
 
 class Memories(Entity, MemoriesValidations):
@@ -153,4 +162,7 @@ class Memories(Entity, MemoriesValidations):
         owner = ""
         if self.owner is not None:
             owner = f"{self.owner.name}'s "
-        return f"{owner}Memories of {len(self.memories_)} skirmishes"
+        return f"{owner} memories of {len(self.memories_)} skirmishes"
+
+    def __repr__(self):
+        return f"<Memories: {self.owner}>"

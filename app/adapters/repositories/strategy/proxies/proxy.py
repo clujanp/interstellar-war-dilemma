@@ -31,3 +31,6 @@ class SecureProxy(Proxy):
             object.__setattr__(self, name, value)
         else:
             setattr(self._writable_proxy, name, value)
+
+    def __repr__(self) -> str:
+        return f"<SecureProxy: {self._obj.__repr__()}>"
