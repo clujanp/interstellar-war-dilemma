@@ -45,37 +45,21 @@ class Memories:
 
     def skirmishes_count(self, civilization: Civilization) -> int: ...
 
-    def first_position(
+    def first_positions(
         self, civilization: Civilization, n: int = 1
-    ) -> Optional[
-        Position.COOPERATION | Position.AGGRESSION
-    ] | List[
-        Position.COOPERATION | Position.AGGRESSION
-    ]: ...
+    ) -> List[Position.COOPERATION | Position.AGGRESSION]: ...
 
-    def first_score(
-        self, civilization: Civilization
-    ) -> Optional[
-        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
-    ] | List[
-        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
-    ]: ...
-
-    def last_position(
+    def first_scores(
         self, civilization: Civilization, n: int = 1
-    ) -> Optional[
-        Position.COOPERATION | Position.AGGRESSION
-    ] | List[
-        Position.COOPERATION | Position.AGGRESSION
-    ]: ...
+    ) -> List[Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD]: ...
 
-    def last_score(
-        self, civilization: Civilization
-    ) -> Optional[
-        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
-    ] | List[
-        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
-    ]: ...
+    def last_positions(
+        self, civilization: Civilization, n: int = 1
+    ) -> List[Position.COOPERATION | Position.AGGRESSION]: ...
+
+    def last_scores(
+        self, civilization: Civilization, n: int = 1
+    ) -> List[Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD]: ...
 
     def cooperations(self, civilization: Civilization) -> Statistic: ...
     def aggressions(self, civilization: Civilization) -> Statistic: ...

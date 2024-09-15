@@ -21,9 +21,9 @@ class BuiltInStrategies:
     def tic_for_tac(
         opponent: Civilization, memories: Memories, **_
     ) -> bool:
-        last_position = memories.last_position(opponent)
-        if last_position is not None:
-            return last_position
+        last_positions = memories.last_positions(opponent)
+        if last_positions is not None:
+            return last_positions
         return Position.COOPERATION
 
     @staticmethod
@@ -40,16 +40,16 @@ class BuiltInStrategies:
     def joss(opponent: Civilization, memories: Memories, **_) -> bool:
         if random() < 0.10:
             return Position.AGGRESSION
-        last_position = memories.last_position(opponent)
-        if last_position is not None:
-            return last_position
+        last_positions = memories.last_positions(opponent)
+        if last_positions is not None:
+            return last_positions
         return Position.COOPERATION
 
     @staticmethod
     def sample(opponent: Civilization, memories: Memories, **_) -> bool:
         if memories.skirmishes_count(opponent) >= 2:
-            last_positions = memories.last_position(opponent, 2)
-            if last_positions == [Position.AGGRESSION, Position.AGGRESSION]:
+            last_positionss = memories.last_positions(opponent, 2)
+            if last_positionss == [Position.AGGRESSION, Position.AGGRESSION]:
                 return Position.AGGRESSION
             return Position.COOPERATION
         return Position.COOPERATION
@@ -60,8 +60,8 @@ class BuiltInStrategies:
         if count_skirmishes == 1:
             return Position.AGGRESSION
         if count_skirmishes >= 2:
-            if memories.first_position(opponent, 2)[1] == Position.AGGRESSION:
-                return memories.last_position(opponent)
+            if memories.first_positions(opponent, 2)[1] == Position.AGGRESSION:
+                return memories.last_positions(opponent)
             if count_skirmishes % 2 == 0:
                 return Position.AGGRESSION
             else:

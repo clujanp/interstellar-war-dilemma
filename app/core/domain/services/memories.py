@@ -1,7 +1,6 @@
 from typing import List, Callable, Optional, Tuple, Dict
 from app.core.domain.models import (
     Score, Result, Statistic, Planet, Civilization, Skirmish, Memories)
-from app.utils.functions import to_snake
 
 
 class MemoriesServiceWrapper:
@@ -46,44 +45,35 @@ class MemoriesServiceWrapper:
         return self._memories.skirmishes_count_by_civilization().get(
             civilization, 0)
 
-    def first_position(
+    def first_positions(
         self, civilization: Civilization, n: int = 1
-    ) -> Optional[bool | List[bool]]:
-        positions = self._get_position_or_score(
+    ) -> List[bool]:
+        return self._get_position_or_score(
             civilization, n, score_instead_position=False)
-        if not positions:
-            return None
-        return positions[0] if n == 1 else positions
 
-    def first_score(
+    def first_scores(
         self, civilization: Civilization, n: int = 1
-    ) -> Optional[Score | List[Score]]:
-        scores = self._get_position_or_score(
+    ) -> List[Score]:
+        return self._get_position_or_score(
             civilization, n, score_instead_position=True)
-        if not scores:
-            return None
-        return scores[0] if n == 1 else scores
 
-    def last_position(
+    def last_positions(
         self, civilization: Civilization, n: int = 1
-    ) -> Optional[bool | List[bool]]:
-        positions = self._get_position_or_score(
+    ) -> List[bool]:
+        return self._get_position_or_score(
             civilization, n, score_instead_position=False, reverse=True)
-        if not positions:
-            return None
-        return positions[0] if n == 1 else positions
 
-    def last_score(
+    def last_scores(
         self, civilization: Civilization, n: int = 1
-    ) -> Optional[Score | List[Score]]:
-        scores = self._get_position_or_score(
+    ) -> List[Score]:
+        return self._get_position_or_score(
             civilization, n, score_instead_position=True, reverse=True)
-        if not scores:
-            return None
-        return scores[0] if n == 1 else scores
 
     def cooperations(self, civilization: Civilization) -> Statistic:
-        return self._statistics(civilization, Result.was_cooperative)
+        _return = self._statistics(civilization, Result.was_cooperative)
+        import logging
+        logging.debug(f"{type(_return) = } {_return = }")
+        return _return
 
     def aggressions(self, civilization: Civilization) -> Statistic:
         return self.cooperations(civilization).invert()

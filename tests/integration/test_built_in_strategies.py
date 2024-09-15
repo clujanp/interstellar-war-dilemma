@@ -30,23 +30,23 @@ def simulate_rounds(strategy, opponent, memories) -> List[bool]:
 def test_always_cooperation_success(
     mock_civilization: Civilization, mock_memories: Memories
 ):
-    mock_memories.last_position.return_value = COO
+    mock_memories.last_positions.return_value = COO
     assert [
         COO for _ in range(10)
     ] == simulate_rounds(
         BIS.always_cooperation, mock_civilization, mock_memories)
-    mock_memories.last_position.assert_not_called()
+    mock_memories.last_positions.assert_not_called()
 
 
 def test_always_aggression_success(
     mock_civilization: Civilization, mock_memories: Memories
 ):
-    mock_memories.last_position.return_value = AGR
+    mock_memories.last_positions.return_value = AGR
     assert [
         AGR for _ in range(10)
     ] == simulate_rounds(
         BIS.always_aggression, mock_civilization, mock_memories)
-    mock_memories.last_position.assert_not_called()
+    mock_memories.last_positions.assert_not_called()
 
 
 def test_random_strategy_success(
@@ -59,20 +59,20 @@ def test_random_strategy_success(
     mock_random.side_effect = random_choices
     assert random_choices == simulate_rounds(
         BIS.random, mock_civilization, mock_memories)
-    mock_memories.last_position.assert_not_called()
+    mock_memories.last_positions.assert_not_called()
 
 
 def test_tic_for_tac_success(
     mock_civilization: Civilization, mock_memories: Memories
 ):
-    mock_memories.last_position.side_effect = [
+    mock_memories.last_positions.side_effect = [
         None, AGR, COO, AGR, COO, AGR, AGR, AGR, COO, COO, COO]
     expected = [COO, AGR, COO, AGR, COO, AGR, AGR, AGR, COO, COO]
     assert expected == simulate_rounds(
         BIS.tic_for_tac, mock_civilization, mock_memories)
     assert [
         call(mock_civilization) for _ in range(10)
-    ] == mock_memories.last_position.call_args_list
+    ] == mock_memories.last_positions.call_args_list
 
 
 def test_friedman_success(
@@ -101,19 +101,19 @@ def test_joss_strategy_success(
     random_choices = [0.0 if i == 7 else 1.0 for i in range(1, 11)]
     mock_random.side_effect = random_choices
 
-    mock_memories.last_position.side_effect = [
+    mock_memories.last_positions.side_effect = [
         None, COO, COO, AGR, COO, COO, COO, COO, COO, COO, COO]
     expected = [COO, COO, COO, AGR, COO, COO, AGR, COO, COO, COO]
     assert expected == simulate_rounds(
         BIS.joss, mock_civilization, mock_memories)
-    mock_memories.last_position.assert_called()
+    mock_memories.last_positions.assert_called()
 
 
 def test_sample_strategy_success(
     mock_civilization: Civilization, mock_memories: Memories
 ):
     mock_memories.skirmishes_count.side_effect = [i for i in range(10)]
-    mock_memories.last_position.side_effect = [
+    mock_memories.last_positions.side_effect = [
         [COO, AGR], [AGR, AGR], [AGR, COO], [COO, COO],
         [COO, AGR], [AGR, COO], [COO, AGR], [AGR, AGR], [AGR, COO],
     ]
@@ -122,7 +122,7 @@ def test_sample_strategy_success(
         BIS.sample, mock_civilization, mock_memories)
     assert [
         call(mock_civilization, 2) for _ in range(8)
-    ] == mock_memories.last_position.call_args_list
+    ] == mock_memories.last_positions.call_args_list
     assert [
         call(mock_civilization) for _ in range(10)
     ] == mock_memories.skirmishes_count.call_args_list
@@ -132,8 +132,8 @@ def test_tester_strategy_success(
     mock_civilization: Civilization, mock_memories: Memories
 ):
     mock_memories.skirmishes_count.side_effect = [i for i in range(10)]
-    mock_memories.first_position.side_effect = [[COO, AGR] for _ in range(8)]
-    mock_memories.last_position.side_effect = [
+    mock_memories.first_positions.side_effect = [[COO, AGR] for _ in range(8)]
+    mock_memories.last_positions.side_effect = [
         AGR, AGR, COO, COO, AGR, COO, COO, COO, COO]
     expected = [COO, AGR, AGR, AGR, COO, COO, AGR, COO, COO, COO]
     assert expected == simulate_rounds(
@@ -143,7 +143,7 @@ def test_tester_strategy_success(
     ] == mock_memories.skirmishes_count.call_args_list
     assert [
         call(mock_civilization, 2) for _ in range(8)
-    ] == mock_memories.first_position.call_args_list
+    ] == mock_memories.first_positions.call_args_list
     assert [
         call(mock_civilization) for _ in range(8)
-    ] == mock_memories.last_position.call_args_list
+    ] == mock_memories.last_positions.call_args_list
