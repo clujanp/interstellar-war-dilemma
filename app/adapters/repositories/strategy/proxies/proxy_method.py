@@ -1,5 +1,6 @@
 from typing import List, Callable
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
+from app.infraestructure.logging import logger
 from .exceptions import RestrictedAccessError
 
 

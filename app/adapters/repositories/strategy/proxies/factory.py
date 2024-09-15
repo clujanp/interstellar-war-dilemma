@@ -2,6 +2,7 @@ from typing import List, Dict, Type, Literal, Union, Any
 from app.core.interfaces.proxies import ProxyFactory
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
 from app.utils.decorators import cached
+from app.infraestructure.logging import logger
 from .executer import SafeExecuter
 from .proxy import SecureProxy
 
@@ -25,6 +26,7 @@ class SecureProxyFactory(ProxyFactory):
     ) -> Union['SecureProxy', object]:
         cls = obj.__class__
         if cls in self._proxy_def:
+            logger.debug(ERR_MSG['debug_secure_proxy'].format(obj.__repr__()))
             return SecureProxy(
                 obj,
                 self._proxy_def[cls]['readable_attrs'],

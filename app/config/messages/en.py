@@ -6,6 +6,8 @@ ERR_SECURE_PROXY = {
     'not_secure_proxy': "Object '{0}' is not configurable as secure proxy",
     'debug_secure_proxy': "Secure proxy created for {0}",
     'debug_metd_warps': "Method {0} of {1} wrapped",
+    'debug_unproxy': "Unproxying args:{0} | kwargs:{1}",
+    'debug_proxy': "Trying proxying {0}",
 }
 
 

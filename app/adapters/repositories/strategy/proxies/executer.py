@@ -1,4 +1,6 @@
 from typing import Callable, Union, Any
+from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
+from app.infraestructure.logging import logger
 from .proxy import SecureProxy
 
 
@@ -14,6 +16,7 @@ class SafeExecuter:
         return wrapper
 
     def _unproxy_args(self, args: tuple, kwargs: dict) -> tuple:
+        logger.debug(ERR_MSG['debug_unproxy'].format(args, kwargs))
         return tuple(
             self._unproxy_arg(arg) for arg in args
         ), {
@@ -42,4 +45,5 @@ class SafeExecuter:
                 self._proxy_return(value)
                 for value in return_value
             )
+        logger.debug(ERR_MSG['debug_proxy'].format(return_value.__repr__()))
         return self._proxy_factory(return_value, pass_=True)

@@ -7,6 +7,8 @@ ERR_SECURE_PROXY = {
         "El objeto '{0}' no se puede configurar como proxy seguro",
     'debug_secure_proxy': "Proxy seguro creado para {0}",
     'debug_metd_warps': "Metod {0} de {1} envuelto",
+    'debug_unproxy': "deshaciendo proxy para args:{0} | kwargs:{1}",
+    'debug_proxy': "Intentando hacer proxy {0}",
 }
 
 
