@@ -70,10 +70,7 @@ class MemoriesServiceWrapper:
             civilization, n, score_instead_position=True, reverse=True)
 
     def cooperations(self, civilization: Civilization) -> Statistic:
-        _return = self._statistics(civilization, Result.was_cooperative)
-        import logging
-        logging.debug(f"{type(_return) = } {_return = }")
-        return _return
+        return self._statistics(civilization, Result.was_cooperative)
 
     def aggressions(self, civilization: Civilization) -> Statistic:
         return self.cooperations(civilization).invert()
