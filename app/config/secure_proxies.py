@@ -19,6 +19,8 @@ SECURITY_PROXY = {
             'civilizations',
             'opponents',
             'skirmishes_count',
+            'first_positions',
+            'first_scores',
             'last_positions',
             'last_scores',
             'cooperations',
@@ -27,6 +29,7 @@ SECURITY_PROXY = {
             'hits',
             'loss',
             'mistakes',
+            'fails',
         ]
     },
 }
