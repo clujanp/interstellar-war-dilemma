@@ -28,8 +28,6 @@ class MemoriesServiceWrapper:
     ) -> None:
         AVAILABLE_VALUES_TYPES = (
             type(None), int, float, str, bool, Civilization, Planet,)
-        for k, v in data.items():
-            print(f"{k = }, {v = } {type(v) = } {v.__class__ = }")
         self._memories.owner_data = {
             k: v for k, v in data.items()
             if type(v) in AVAILABLE_VALUES_TYPES
