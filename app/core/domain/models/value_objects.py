@@ -60,6 +60,7 @@ class Statistic(int):
             return 0.0
         return self / self.total
 
+    def __hash__(self): return hash(self.percent)
     def __str__(self): return super().__repr__()
 
     def __repr__(self):
