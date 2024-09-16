@@ -10,7 +10,7 @@ from app.adapters.repositories.strategy.proxies.proxy_write import (
 from app.adapters.repositories.strategy.proxies.proxy_method import (
     MethodAccessibleProxy)
 from app.adapters.repositories.strategy.proxies.executer import SafeExecuter
-from app.adapters.repositories.strategy.proxies.exceptions import (
+from app.infraestructure.exceptions.proxy import (
     RestrictedAccessError, OverrideError)
 
 

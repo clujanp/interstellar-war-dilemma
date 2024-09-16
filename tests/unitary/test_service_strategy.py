@@ -3,7 +3,8 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch, call
 from app.core.domain.models import Cost
 from app.core.domain.services import StrategyService
-from app.config.messages.en import ERR_STRATEGY_SERVICE
+from app.infraestructure.exceptions.strategies import (
+    NotSignedStrategyError, InvalidStrategyResponeError)
 
 
 class TestStrategyService(TestCase):

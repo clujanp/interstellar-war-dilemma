@@ -1,6 +1,6 @@
 from typing import List, Any
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
-from .exceptions import OverrideError
+from app.infraestructure.exceptions.proxy import OverrideError
 
 
 class WritableProxy:

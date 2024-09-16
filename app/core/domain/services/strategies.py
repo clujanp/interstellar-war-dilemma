@@ -1,6 +1,8 @@
 from app.core.interfaces.repositories.strategies import StrategyRepository
 from app.core.domain.models import Civilization, Planet
 from app.core.interfaces.proxies import Proxy
+from app.infraestructure.exceptions.strategies import (
+    NotSignedStrategyError, InvalidStrategyResponeError)
 from app.infraestructure.logging import logger
 from app.config.messages import ERR_STRATEGY_SERVICE
 from .memories import MemoriesServiceWrapper
