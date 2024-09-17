@@ -1,10 +1,11 @@
+from uuid import uuid4
 from app.core.interfaces.repositories.strategies import StrategyRepository
-from app.core.domain.models import Civilization, Planet
+from app.core.domain.models import Civilization, Planet, Position
 from app.core.interfaces.proxies import Proxy
 from app.infraestructure.exceptions.strategies import (
     NotSignedStrategyError, InvalidStrategyResponeError)
 from app.infraestructure.logging import logger
-from app.config.messages import ERR_STRATEGY_SERVICE
+from app.config.messages import ERR_STRATEGY_SERVICE as ERR_MSG
 from .memories import MemoriesServiceWrapper
 
 
@@ -16,6 +17,7 @@ class StrategyService:
     ):
         self.repository = repository
         self.proxy_factory = proxy_factory
+        self.__signature = hash(uuid4())
 
     def load_strategies(self) -> dict[str, callable]:
         return self.repository.load_strategies()
@@ -37,6 +39,7 @@ class StrategyService:
             ) -> bool: COOPERATION | AGGRESSION
         """
         mask = self._mask_execution_entities
+        SHOW_TRACEBACK_VALIDATION = self.SHOW_TRACEBACK_VALIDATION
 
         def wrapper(
             self: Civilization,
@@ -44,14 +47,28 @@ class StrategyService:
             opponent: Civilization,
         ) -> bool:
             opponent, planet, memories = mask(opponent, planet, self.memory)
-            return strategy(
-                opponent=opponent,
-                planet=planet,
-                memories=memories,
-                resources=self.resources,
-            )
+            try:
+                position = strategy(
+                    opponent=opponent,
+                    planet=planet,
+                    memories=memories,
+                    resources=self.resources,
+                )
+                if position not in [Position.COOPERATION, Position.AGGRESSION]:
+                    raise InvalidStrategyResponeError(
+                        ERR_MSG['must_return'].format
+                        (strategy.__name__, position)
+                    )
+                return position
+            except InvalidStrategyResponeError as err:
+                logger.error(err, exc_info=SHOW_TRACEBACK_VALIDATION)
+                return Position.FAIL
+            except Exception as err:
+                logger.error(err, exc_info=SHOW_TRACEBACK_VALIDATION)
+                return Position.FAIL
 
         wrapper.name = strategy.__name__
+        wrapper.__signature__ = self.__signature
         return wrapper
 
     def _mask_execution_entities(
@@ -77,28 +94,21 @@ class StrategyService:
         test_opponent: Civilization,
     ) -> bool:
         try:
+            if getattr(strategy, '__signature__', None) != self.__signature:
+                raise NotSignedStrategyError(
+                    ERR_MSG['signature'].format(strategy.name))
             response = strategy(
                 self=test_self,
                 planet=test_planet,
                 opponent=test_opponent,
             )
-            if response not in [True, False]:
-                raise ValueError(
-                    ERR_STRATEGY_SERVICE['must_return'].format(
-                        strategy.name, response))
+            if response is Position.FAIL:
+                return False
             return True
-        # TODO: improve error notification eg: share lineno
-        except TypeError as err:
-            logger.error(err, exc_info=self.SHOW_TRACEBACK_VALIDATION)
-            return False
-        except ValueError as err:
-            logger.error(err, exc_info=self.SHOW_TRACEBACK_VALIDATION)
-            return False
         except Exception as err:
-            logger.error(err, exc_info=self.SHOW_TRACEBACK_VALIDATION)
+            logger.critical(err, exc_info=self.SHOW_TRACEBACK_VALIDATION)
             return False
         finally:
-            # TODO: add to unit tests
             del test_planet
             del test_self
             del test_opponent
