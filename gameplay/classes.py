@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 
 
 # value objects
@@ -12,6 +12,7 @@ class Cost:
 class Position:
     COOPERATION = True
     AGGRESSION = False
+    FAIL = None
 
 
 class Score(int):
@@ -47,7 +48,9 @@ class Memories:
 
     def first_positions(
         self, civilization: Civilization, n: int = 1
-    ) -> List[Position.COOPERATION | Position.AGGRESSION]: ...
+    ) -> List[Union[
+        Position.COOPERATION, Position.AGGRESSION, Position.FAIL]
+    ]: ...
 
     def first_scores(
         self, civilization: Civilization, n: int = 1
@@ -55,7 +58,9 @@ class Memories:
 
     def last_positions(
         self, civilization: Civilization, n: int = 1
-    ) -> List[Position.COOPERATION | Position.AGGRESSION]: ...
+    ) -> List[Union[
+        Position.COOPERATION, Position.AGGRESSION, Position.FAIL]
+    ]: ...
 
     def last_scores(
         self, civilization: Civilization, n: int = 1

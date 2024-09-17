@@ -22,8 +22,8 @@ class BuiltInStrategies:
         opponent: Civilization, memories: Memories, **_
     ) -> bool:
         last_positions = memories.last_positions(opponent)
-        if last_positions is not None:
-            return last_positions
+        if last_positions and last_positions[0] is not Position.FAIL:
+            return last_positions[0]
         return Position.COOPERATION
 
     @staticmethod
@@ -31,7 +31,6 @@ class BuiltInStrategies:
         opponent: Civilization, memories: Memories, **_
     ) -> bool:
         aggressions = memories.aggressions(opponent)
-        print(f"{aggressions.percent = }")
         if aggressions.percent > 0:
             return Position.AGGRESSION
         return Position.COOPERATION
@@ -41,15 +40,15 @@ class BuiltInStrategies:
         if random() < 0.10:
             return Position.AGGRESSION
         last_positions = memories.last_positions(opponent)
-        if last_positions is not None:
-            return last_positions
+        if last_positions and last_positions[0] is not Position.FAIL:
+            return last_positions[0]
         return Position.COOPERATION
 
     @staticmethod
     def sample(opponent: Civilization, memories: Memories, **_) -> bool:
         if memories.skirmishes_count(opponent) >= 2:
-            last_positionss = memories.last_positions(opponent, 2)
-            if last_positionss == [Position.AGGRESSION, Position.AGGRESSION]:
+            last_positions = memories.last_positions(opponent, 2)
+            if last_positions == [Position.AGGRESSION, Position.AGGRESSION]:
                 return Position.AGGRESSION
             return Position.COOPERATION
         return Position.COOPERATION
@@ -61,7 +60,7 @@ class BuiltInStrategies:
             return Position.AGGRESSION
         if count_skirmishes >= 2:
             if memories.first_positions(opponent, 2)[1] == Position.AGGRESSION:
-                return memories.last_positions(opponent)
+                return memories.last_positions(opponent)[0]
             if count_skirmishes % 2 == 0:
                 return Position.AGGRESSION
             else:
