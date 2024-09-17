@@ -1,4 +1,7 @@
-class Score(int):
+from enum import IntEnum
+
+
+class Score(IntEnum):
     LOSE = 0
     TIE_BAD = 1
     ALONE_WIN = 2
@@ -6,17 +9,8 @@ class Score(int):
     WIN = 5
     MAX_SCORE = 6
 
-    def __new__(cls, value: int):
-        assert value in (
-            cls.LOSE, cls.TIE_BAD, cls.TIE_GOOD, cls.WIN, cls.ALONE_WIN
-        ), "Invalid score value"
-        return super().__new__(cls, value)
 
-    def __str__(self): return super().__repr__()
-    def __repr__(self): return f"<Score: {self}>"
-
-
-class Cost:
+class Cost(IntEnum):
     HIGH = 3
     MEDIUM = 2
     LOW = 1
@@ -27,6 +21,8 @@ class Position:
     COOPERATION = True
     AGGRESSION = False
     FAIL = None  # fail in take a decision (raise an exception or return None)
+    VALID_RESPONSE = [COOPERATION, AGGRESSION]
+    ALL = [COOPERATION, AGGRESSION, FAIL]
 
 
 class Result:
@@ -50,9 +46,9 @@ class Result:
 class Statistic(int):
     def __new__(cls, value: int, total: int):
         assert value >= 0, "Invalid statistic value"
-        value = super().__new__(cls, value)
-        value.total = total
-        return value
+        obj = super().__new__(cls, value)
+        obj.total = total
+        return obj
 
     def invert(self) -> 'Statistic':
         return Statistic(self.total - self, self.total)

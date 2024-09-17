@@ -12,9 +12,10 @@ class TestScore(TestCase):
         assert Score(Score.LOSE) == Score.LOSE
         assert Score(Score.ALONE_WIN) == Score.ALONE_WIN
 
-    def test_score_creation_fail(self):
-        with self.assertRaises(AssertionError):
+    def test_score_creation_other_value(self):
+        with self.assertRaises(ValueError) as context:
             Score(10)
+        assert str(context.exception) == '10 is not a valid Score'
 
 
 class TestPosition(TestCase):
