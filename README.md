@@ -28,3 +28,7 @@ Best of all, **you don't need to be a coding expert!** 🧑‍💻 With the help
   ![Process](assets/images/strategy_proxy_frame_process_safely.drawio.png)
   - Components of the secure proxy frame.
   ![Components](assets/images/strategy_proxy_frame_components.drawio.png)
+
+## ToDos
+- [ ] Solve bloat time execution of +2.75% / round in SkirmishUseCases.resolve
+- [ ] Analyze vs balances in opponents selection across rounds 
