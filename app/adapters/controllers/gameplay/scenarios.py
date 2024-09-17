@@ -1,7 +1,7 @@
 from .controller import GameplayController as Controller
 from app.utils.functions import snake_to_pascal
 from app.core.domain.models import Score
-from app.infraestructure.logging import logger
+from app.application.logging import logger
 
 
 # controller(prompt) -> process(context) -> rasterize(template, context)

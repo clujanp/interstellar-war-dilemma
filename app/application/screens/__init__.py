@@ -7,7 +7,7 @@ from .filters import (
 
 
 class Screen:
-    TEMPLATES_ROOT = 'app/infraestructure/screens/templates'
+    TEMPLATES_ROOT = 'app/application/screens/templates'
     DEFAULT_PROMPT = '> '
 
     def __init__(self):

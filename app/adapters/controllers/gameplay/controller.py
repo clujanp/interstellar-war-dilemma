@@ -1,5 +1,5 @@
 from typing import List, Optional
-from app.infraestructure.screens import Screen
+from app.application.screens import Screen
 
 
 class GameplayController:

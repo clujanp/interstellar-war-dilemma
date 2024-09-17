@@ -2,9 +2,9 @@ from uuid import uuid4
 from app.core.interfaces.repositories.strategies import StrategyRepository
 from app.core.domain.models import Civilization, Planet, Position
 from app.core.interfaces.proxies import Proxy
-from app.infraestructure.exceptions.strategies import (
+from app.application.exceptions.strategies import (
     NotSignedStrategyError, InvalidStrategyResponeError)
-from app.infraestructure.logging import logger
+from app.application.logging import logger
 from app.config.messages import ERR_STRATEGY_SERVICE as ERR_MSG
 from .memories import MemoriesServiceWrapper
 

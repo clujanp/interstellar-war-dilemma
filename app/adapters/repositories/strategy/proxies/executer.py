@@ -1,6 +1,6 @@
 from typing import Callable, Union, Any
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
-from app.infraestructure.logging import logger
+from app.application.logging import logger
 from .proxy import SecureProxy
 
 

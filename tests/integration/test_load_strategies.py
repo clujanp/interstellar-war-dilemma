@@ -4,7 +4,7 @@ from pytest_mock import MockerFixture
 from app.config.injection_dependency import (
     get_gameplay_controller, GameplayController)
 from app.config.local_strategies_repository import REPO_CONFIG
-from app.infraestructure.exceptions.proxy import (
+from app.application.exceptions.proxy import (
     OverrideError, RestrictedAccessError)
 
 

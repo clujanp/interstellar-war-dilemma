@@ -1,6 +1,6 @@
 from typing import List, Any
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
-from app.infraestructure.exceptions.proxy import RestrictedAccessError
+from app.application.exceptions.proxy import RestrictedAccessError
 
 
 class ReadableProxy:

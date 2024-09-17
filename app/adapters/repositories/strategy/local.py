@@ -1,7 +1,7 @@
 from random import choice
 from typing import List, Dict, Callable, Tuple
 from app.core.interfaces.repositories.strategies import StrategyRepository
-from app.infraestructure.logging import logger
+from app.application.logging import logger
 from app.config.messages import ERR_LOCAL_REPOSITORY_STRATEGY as ERR_MSG
 
 

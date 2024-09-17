@@ -2,7 +2,7 @@ from typing import List, Dict, Type, Literal, Union, Any
 from app.core.interfaces.proxies import ProxyFactory
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
 from app.utils.decorators import cached
-from app.infraestructure.logging import logger
+from app.application.logging import logger
 from .executer import SafeExecuter
 from .proxy import SecureProxy
 

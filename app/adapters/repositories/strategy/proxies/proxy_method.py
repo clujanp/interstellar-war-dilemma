@@ -1,8 +1,8 @@
 from typing import List, Callable
 from app.config.messages import ERR_SECURE_PROXY as ERR_MSG
-from app.infraestructure.logging import logger
+from app.application.logging import logger
 from app.utils.decorators import cached
-from app.infraestructure.exceptions.proxy import RestrictedAccessError
+from app.application.exceptions.proxy import RestrictedAccessError
 
 
 class MethodAccessibleProxy:

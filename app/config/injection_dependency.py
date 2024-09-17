@@ -1,5 +1,5 @@
 from app.adapters.controllers.gameplay.controller import GameplayController
-from app.infraestructure.logging import logger, logging
+from app.application.logging import logger, logging
 
 
 logger.stopwatch_level = logging.INFO
