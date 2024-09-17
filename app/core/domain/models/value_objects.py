@@ -1,13 +1,15 @@
 class Score(int):
     LOSE = 0
     TIE_BAD = 1
+    ALONE_WIN = 2
     TIE_GOOD = 3
     WIN = 5
     MAX_SCORE = 6
 
     def __new__(cls, value: int):
-        assert value in (cls.LOSE, cls.TIE_BAD, cls.TIE_GOOD, cls.WIN,), (
-            "Invalid score value")
+        assert value in (
+            cls.LOSE, cls.TIE_BAD, cls.TIE_GOOD, cls.WIN, cls.ALONE_WIN
+        ), "Invalid score value"
         return super().__new__(cls, value)
 
     def __str__(self): return super().__repr__()
@@ -31,6 +33,7 @@ class Result:
     COOPERATION = 1  # both cooperated
     CONQUEST = 0  # one cooperated and the other not
     AGGRESSION = -1  # both aggressed
+    ALONE_WIN = -3  # one cooperated and the other failed
     FAIL = -5  # both failed in take a decision
 
     was_cooperative = (  # noqa: E731
@@ -62,6 +65,4 @@ class Statistic(int):
 
     def __hash__(self): return hash(self.percent)
     def __str__(self): return super().__repr__()
-
-    def __repr__(self):
-        return f"<Statistic: {self.percent:.2f}>"
+    def __repr__(self): return f"<Statistic: {self.percent:.2f}>"

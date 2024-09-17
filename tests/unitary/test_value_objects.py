@@ -6,8 +6,11 @@ from app.core.domain.models.value_objects import (
 
 class TestScore(TestCase):
     def test_score_creation_success(self):
-        score = Score(Score.WIN)
-        assert score == Score.WIN
+        assert Score(Score.WIN) == Score.WIN
+        assert Score(Score.TIE_GOOD) == Score.TIE_GOOD
+        assert Score(Score.TIE_BAD) == Score.TIE_BAD
+        assert Score(Score.LOSE) == Score.LOSE
+        assert Score(Score.ALONE_WIN) == Score.ALONE_WIN
 
     def test_score_creation_fail(self):
         with self.assertRaises(AssertionError):
@@ -26,6 +29,13 @@ class TestResult(TestCase):
         self.positions = [
             Position.COOPERATION, Position.AGGRESSION, Position.FAIL]
         self.scores = [Score.LOSE, Score.TIE_BAD, Score.TIE_GOOD, Score.WIN]
+
+    def test_result_constants(self):
+        assert Result.COOPERATION == 1
+        assert Result.CONQUEST == 0
+        assert Result.AGGRESSION == -1
+        assert Result.ALONE_WIN == -3
+        assert Result.FAIL == -5
 
     def test_was_cooperative(self):
         for posture in self.positions:
