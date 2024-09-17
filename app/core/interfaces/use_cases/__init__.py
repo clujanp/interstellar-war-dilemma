@@ -47,7 +47,7 @@ class StrategiesUseCases:
         )
 
     def select_random_builtin(self) -> callable:
-        return self.service.select_random_builtin()
+        return self.service.mask_strategy(self.service.select_random_builtin())
 
 
 class CivilizationUseCases:
