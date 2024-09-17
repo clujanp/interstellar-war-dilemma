@@ -3,7 +3,7 @@ from pydantic import Field
 from collections import defaultdict
 from app.utils.decorators import cached
 from .base import Entity
-from .value_objects import Score, Result
+from .value_objects import Score
 from .validations import (
     PlanetValidations, CivilizationValidations, SkirmishValidations,
     MemoriesValidations
@@ -52,6 +52,7 @@ class Skirmish(Entity, SkirmishValidations):
     winner_: Optional[List[Civilization]] = None
     score_1: Optional[int] = None
     score_2: Optional[int] = None
+    result: Optional[int] = None
 
     @property
     def civilizations(self) -> Tuple[Civilization, Civilization]:
@@ -60,16 +61,6 @@ class Skirmish(Entity, SkirmishValidations):
     @property
     def combined_score(self) -> int:
         return (self.score_1 or 0) + (self.score_2 or 0)
-
-    @property
-    def result(
-        self
-    ) -> Result.COOPERATION | Result.CONQUEST | Result.AGGRESSION:
-        if all([self.posture_1, self.posture_2]):
-            return Result.COOPERATION
-        if any([self.posture_1, self.posture_2]):
-            return Result.CONQUEST
-        return Result.AGGRESSION
 
     def behavior(self, civilization: Civilization) -> Tuple[bool, Score]:
         if civilization == self.civilization_1:

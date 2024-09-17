@@ -74,6 +74,7 @@ class TestModelSkirmish(TestCase):
             winner_=[self.civ2],
             score_1=Score.LOSE,
             score_2=Score.WIN,
+            result=Result.CONQUEST,
         )
 
     def test_skirmish_initialization_success(self):
@@ -85,32 +86,13 @@ class TestModelSkirmish(TestCase):
         assert self.skirmish.winner_ == [self.civ2]
         assert self.skirmish.score_1 == Score.LOSE
         assert self.skirmish.score_2 == Score.WIN
+        assert self.skirmish.result == Result.CONQUEST
 
     def test_property_civilizations_success(self):
         assert (self.civ1, self.civ2) == self.skirmish.civilizations
 
     def test_property_combined_score_success(self):
         assert Score.LOSE + Score.WIN == self.skirmish.combined_score
-
-    def test_property_result_cooperation_success(self):
-        self.skirmish.posture_1 = Position.COOPERATION
-        self.skirmish.posture_2 = Position.COOPERATION
-        assert Result.COOPERATION == self.skirmish.result
-
-    def test_property_result_conquest_success(self):
-        self.skirmish.posture_1 = Position.COOPERATION
-        self.skirmish.posture_2 = Position.AGGRESSION
-        assert Result.CONQUEST == self.skirmish.result
-
-    def test_property_result_another_conquest_success(self):
-        self.skirmish.posture_1 = Position.AGGRESSION
-        self.skirmish.posture_2 = Position.COOPERATION
-        assert Result.CONQUEST == self.skirmish.result
-
-    def test_property_result_aggression_success(self):
-        self.skirmish.posture_1 = Position.AGGRESSION
-        self.skirmish.posture_2 = Position.AGGRESSION
-        assert Result.AGGRESSION == self.skirmish.result
 
     def test_behavior_civilization_1_success(self):
         response = self.skirmish.behavior(self.civ1)
