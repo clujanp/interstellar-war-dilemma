@@ -15,7 +15,7 @@ class BuiltInStrategies:
 
     @staticmethod
     def random(**_) -> bool:
-        return choice([Position.COOPERATION, Position.AGGRESSION])
+        return choice(Position.VALID_RESPONSE)
 
     @staticmethod
     def tic_for_tac(

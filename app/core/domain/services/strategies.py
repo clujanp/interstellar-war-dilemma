@@ -54,7 +54,7 @@ class StrategyService:
                     memories=memories,
                     resources=self.resources,
                 )
-                if position not in [Position.COOPERATION, Position.AGGRESSION]:
+                if position not in Position.VALID_RESPONSE:
                     raise InvalidStrategyResponeError(
                         ERR_MSG['must_return'].format
                         (strategy.__name__, position)

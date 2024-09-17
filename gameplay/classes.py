@@ -13,6 +13,7 @@ class Position:
     COOPERATION = True
     AGGRESSION = False
     FAIL = None
+    VALID_RESPONSE = [COOPERATION, AGGRESSION]
 
 
 class Score(int):
