@@ -84,7 +84,7 @@ def estrategia(memories, planet, opponent, resources):
 
 ### Definicion de tipos de datos y metodos:
 ```python
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 
 
 # value objects
@@ -98,6 +98,7 @@ class Cost:
 class Position:
     COOPERATION = True
     AGGRESSION = False
+    FAIL = None
 
 
 class Score(int):
@@ -133,35 +134,23 @@ class Memories:
 
     def first_positions(
         self, civilization: Civilization, n: int = 1
-    ) -> Optional[
-        Position.COOPERATION | Position.AGGRESSION
-    ] | List[
-        Position.COOPERATION | Position.AGGRESSION
+    ) -> List[Union[
+        Position.COOPERATION, Position.AGGRESSION, Position.FAIL]
     ]: ...
 
     def first_scores(
-        self, civilization: Civilization
-    ) -> Optional[
-        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
-    ] | List[
-        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
-    ]: ...
+        self, civilization: Civilization, n: int = 1
+    ) -> List[Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD]: ...
 
     def last_positions(
         self, civilization: Civilization, n: int = 1
-    ) -> Optional[
-        Position.COOPERATION | Position.AGGRESSION
-    ] | List[
-        Position.COOPERATION | Position.AGGRESSION
+    ) -> List[Union[
+        Position.COOPERATION, Position.AGGRESSION, Position.FAIL]
     ]: ...
 
     def last_scores(
-        self, civilization: Civilization
-    ) -> Optional[
-        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
-    ] | List[
-        Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD
-    ]: ...
+        self, civilization: Civilization, n: int = 1
+    ) -> List[Score.WIN | Score.LOSE | Score.TIE_GOOD | Score.TIE_BAD]: ...
 
     def cooperations(self, civilization: Civilization) -> Statistic: ...
     def aggressions(self, civilization: Civilization) -> Statistic: ...
@@ -169,7 +158,7 @@ class Memories:
     def hits(self, civilization: Civilization) -> Statistic: ...
     def loss(self, civilization: Civilization) -> Statistic: ...
     def mistakes(self, civilization: Civilization) -> Statistic: ...
-
+    def fails(self, civilization: Civilization) -> Statistic: ...
 ```
 
 
