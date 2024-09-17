@@ -13,6 +13,7 @@ ERR_SECURE_PROXY = {
 
 ERR_STRATEGY_SERVICE = {
     'must_return': "Strategy '{0}' must return a boolean value, got {1}",
+    'signature': "Invalid strategy signature of '{0}'",
 }
 
 

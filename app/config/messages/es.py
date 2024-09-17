@@ -15,6 +15,7 @@ ERR_SECURE_PROXY = {
 ERR_STRATEGY_SERVICE = {
     'must_return':
         "La estrategia '{0}' debe devolver un valor booleano, se obtuvo {1}",
+    'signature': "Firma de estrategia '{0}' no válida",
 }
 
 
