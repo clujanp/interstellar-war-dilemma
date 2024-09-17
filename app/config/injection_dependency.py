@@ -23,6 +23,7 @@ def get_gameplay_controller() -> GameplayController:
     from app.adapters.repositories.strategy.proxies import SecureProxyFactory
     from app.config.secure_proxies import SECURITY_PROXY
     from app.config.local_strategies_repository import REPO_CONFIG
+    from app.config.skirmishes import RESOLUTER, RESULT_EMOJI, POSITION_EMOJI
 
     planet_service = PlanetService()
     civilization_service = CivilizationService()
@@ -30,6 +31,7 @@ def get_gameplay_controller() -> GameplayController:
     strategy_repo = StrategyRepository(**REPO_CONFIG)
     strategy_proxy_factory = SecureProxyFactory(SECURITY_PROXY)
     strategy_service = StrategyService(strategy_repo, strategy_proxy_factory)
+    skirmish_service = SkirmishService(resoluter=RESOLUTER)
 
     gameplay = GameplayController(
         starts='welcome',
@@ -40,14 +42,16 @@ def get_gameplay_controller() -> GameplayController:
                 'strategies': StrategiesUseCases(
                     strategy_service, planet_service, civilization_service),
                 'civilizations': CivilizationUseCases(civilization_service),
-                'skirmish': SkirmishUseCases(SkirmishService()),
+                'skirmish': SkirmishUseCases(skirmish_service),
                 'round': RoundUseCases(RoundService()),
                 'memories': MemoriesUseCases(),
             },
             'config': {
                 'initial_resources': 100,
                 'complementary_civilization_name': 'Barbarians',
-            }
+            },
+            'result_emoji': RESULT_EMOJI,
+            'position_emoji': POSITION_EMOJI,
         }
     )
     gameplay.context['memories'] = gameplay.context['use_cases']['memories']
