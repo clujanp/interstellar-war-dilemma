@@ -15,5 +15,5 @@
         {% set bar = ((center | rjust(half_bar_lenght + 1) | ljust(goodfill, fillchar)) + indicator) | ljust(bar_lenght + 1) -%}
     {% endif -%}
 
-    {{ civ.name | rjust(21) }}: {{ data['score'] | string | rjust(3) }} 🪙 | {{ (data['accuracy'] * 100) | round(1) }} % 🎯 | ☠️  {{ bar }} 🕊️  {{ ((data['position'] * 100) | round(1) ) | string | rjust(5) }} % 🫶🏻 
+    {{ civ.name | rjust(32) }}: {{ data['score'] | string | rjust(6) }} 🪙 | {{ (data['accuracy'] * 100) | round(1) | string | rjust(5) }} % 🎯 | ☠️  {{ bar }} 🕊️  {{ ((data['position'] * 100) | round(1) ) | string | rjust(5) }} % 🫶🏻 
 {% endfor -%}
