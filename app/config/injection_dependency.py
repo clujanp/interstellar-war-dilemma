@@ -1,7 +1,13 @@
 from app.adapters.controllers.gameplay.controller import GameplayController
+from app.infraestructure.logging import logger, logging
+
+
+logger.stopwatch_level = logging.INFO
 
 
 def get_gameplay_controller() -> GameplayController:
+    logger.start_stopwatch('injection')
+
     from app.adapters.controllers.gameplay.controller import GameplayController
     from app.adapters.controllers.gameplay.scenarios import (
         welcome, start, rounds, summary, end)
@@ -46,4 +52,7 @@ def get_gameplay_controller() -> GameplayController:
     )
     gameplay.context['memories'] = gameplay.context['use_cases']['memories']
     gameplay.register_scenarios(welcome, start, rounds, summary, end)
+
+    logger.stop_stopwatch(
+        'injection', "Injection of dependencies ⏱️  {ms}ms")
     return gameplay
