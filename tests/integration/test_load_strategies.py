@@ -23,7 +23,7 @@ def test_load_strategies(
     from tests.integration.mocks.strategies.mock_strategy_1 import test01
 
     gameplay = setup_gameplay
-    mock_logger_error = mocker.patch('logging.Logger.error')
+    mock_logger_error = mocker.patch('logging.Logger.critical')
 
     strategies_use_cases = gameplay.context['use_cases']['strategies']
     expected_stratgies = {
@@ -33,6 +33,8 @@ def test_load_strategies(
 
     # validate all errors are logged
     expected_errors = {
+        AssertionError:
+            "Strategy 'test_fail1' must return a boolean value, got None",
         ValueError:
             "Strategy 'test_fail1' must return a boolean value, got None",
         TypeError:

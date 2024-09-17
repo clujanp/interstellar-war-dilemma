@@ -23,7 +23,7 @@ class TestBuiltInStrategies(TestCase):
         assert result in [Position.COOPERATION, Position.AGGRESSION]
 
     def test_tic_for_tac_with_last_positions_success(self):
-        self.mock_memories.last_positions.return_value = Position.AGGRESSION
+        self.mock_memories.last_positions.return_value = [Position.AGGRESSION]
         result = BuiltInStrategies.tic_for_tac(
             self.mock_opponent, self.mock_memories)
         assert result == Position.AGGRESSION
@@ -31,7 +31,7 @@ class TestBuiltInStrategies(TestCase):
             self.mock_opponent)
 
     def test_tic_for_tac_without_last_positions_success(self):
-        self.mock_memories.last_positions.return_value = None
+        self.mock_memories.last_positions.return_value = []
         result = BuiltInStrategies.tic_for_tac(
             self.mock_opponent, self.mock_memories)
         assert result in [Position.COOPERATION, Position.AGGRESSION]
@@ -57,9 +57,9 @@ class TestBuiltInStrategies(TestCase):
     @patch('gameplay.strategy.random')
     def test_joss_with_last_positions_success(self, mock_random: MagicMock):
         mock_random.return_value = 0.90
-        self.mock_memories.last_positions.return_value = Position.COOPERATION
+        self.mock_memories.last_positions.return_value = [Position.COOPERATION]
         result = BuiltInStrategies.joss(self.mock_opponent, self.mock_memories)
-        assert result == self.mock_memories.last_positions.return_value
+        assert result == self.mock_memories.last_positions.return_value[0]
         mock_random.assert_called_once_with()
         self.mock_memories.last_positions.assert_called_once_with(
             self.mock_opponent)
@@ -69,7 +69,7 @@ class TestBuiltInStrategies(TestCase):
         self, mock_random: MagicMock
     ):
         mock_random.return_value = 0.90
-        self.mock_memories.last_positions.return_value = None
+        self.mock_memories.last_positions.return_value = []
         result = BuiltInStrategies.joss(self.mock_opponent, self.mock_memories)
         assert result == Position.COOPERATION
         mock_random.assert_called_once_with()
@@ -79,7 +79,7 @@ class TestBuiltInStrategies(TestCase):
     @patch('gameplay.strategy.random')
     def test_joss_with_random_10_percent_success(self, mock_random: MagicMock):
         mock_random.return_value = 0.09
-        self.mock_memories.last_positions.return_value = Position.COOPERATION
+        self.mock_memories.last_positions.return_value = [Position.COOPERATION]
         result = BuiltInStrategies.joss(self.mock_opponent, self.mock_memories)
         assert result == Position.AGGRESSION
         mock_random.assert_called_once_with()
@@ -109,7 +109,7 @@ class TestBuiltInStrategies(TestCase):
         self.mock_memories.skirmishes_count.return_value = 2
         self.mock_memories.first_positions.return_value = [
             Position.COOPERATION, Position.AGGRESSION]
-        self.mock_memories.last_positions.return_value = Position.AGGRESSION
+        self.mock_memories.last_positions.return_value = [Position.AGGRESSION]
         result = BuiltInStrategies.tester(
             self.mock_opponent, self.mock_memories)
         assert Position.AGGRESSION == result
@@ -124,7 +124,7 @@ class TestBuiltInStrategies(TestCase):
         self.mock_memories.skirmishes_count.return_value = 3
         self.mock_memories.first_positions.return_value = [
             Position.COOPERATION, Position.AGGRESSION, Position.COOPERATION]
-        self.mock_memories.last_positions.return_value = Position.COOPERATION
+        self.mock_memories.last_positions.return_value = [Position.COOPERATION]
         result = BuiltInStrategies.tester(
             self.mock_opponent, self.mock_memories)
         assert Position.COOPERATION == result
@@ -139,7 +139,7 @@ class TestBuiltInStrategies(TestCase):
         self.mock_memories.skirmishes_count.return_value = 3
         self.mock_memories.first_positions.return_value = [
             Position.COOPERATION, Position.COOPERATION, Position.AGGRESSION]
-        self.mock_memories.last_positions.return_value = Position.COOPERATION
+        self.mock_memories.last_positions.return_value = [Position.COOPERATION]
         result = BuiltInStrategies.tester(
             self.mock_opponent, self.mock_memories)
         assert Position.COOPERATION == result
@@ -155,7 +155,7 @@ class TestBuiltInStrategies(TestCase):
             Position.COOPERATION, Position.COOPERATION, Position.AGGRESSION,
             Position.COOPERATION
         ]
-        self.mock_memories.last_positions.return_value = Position.COOPERATION
+        self.mock_memories.last_positions.return_value = [Position.COOPERATION]
         result = BuiltInStrategies.tester(
             self.mock_opponent, self.mock_memories)
         assert Position.AGGRESSION == result

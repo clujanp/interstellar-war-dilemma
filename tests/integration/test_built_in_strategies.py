@@ -66,7 +66,9 @@ def test_tic_for_tac_success(
     mock_civilization: Civilization, mock_memories: Memories
 ):
     mock_memories.last_positions.side_effect = [
-        None, AGR, COO, AGR, COO, AGR, AGR, AGR, COO, COO, COO]
+        [], [AGR], [COO], [AGR], [COO], [AGR], [AGR], [AGR], [COO], [COO],
+        [COO]
+    ]
     expected = [COO, AGR, COO, AGR, COO, AGR, AGR, AGR, COO, COO]
     assert expected == simulate_rounds(
         BIS.tic_for_tac, mock_civilization, mock_memories)
@@ -102,7 +104,9 @@ def test_joss_strategy_success(
     mock_random.side_effect = random_choices
 
     mock_memories.last_positions.side_effect = [
-        None, COO, COO, AGR, COO, COO, COO, COO, COO, COO, COO]
+        [], [COO], [COO], [AGR], [COO], [COO], [COO], [COO], [COO], [COO],
+        [COO]
+    ]
     expected = [COO, COO, COO, AGR, COO, COO, AGR, COO, COO, COO]
     assert expected == simulate_rounds(
         BIS.joss, mock_civilization, mock_memories)
@@ -134,7 +138,7 @@ def test_tester_strategy_success(
     mock_memories.skirmishes_count.side_effect = [i for i in range(10)]
     mock_memories.first_positions.side_effect = [[COO, AGR] for _ in range(8)]
     mock_memories.last_positions.side_effect = [
-        AGR, AGR, COO, COO, AGR, COO, COO, COO, COO]
+        [AGR], [AGR], [COO], [COO], [AGR], [COO], [COO], [COO], [COO]]
     expected = [COO, AGR, AGR, AGR, COO, COO, AGR, COO, COO, COO]
     assert expected == simulate_rounds(
         BIS.tester, mock_civilization, mock_memories)
