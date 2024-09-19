@@ -1,4 +1,5 @@
 from typing import List, Callable, Optional, Tuple, Dict
+from collections import defaultdict
 from app.core.domain.models import (
     Score, Result, Statistic, Planet, Civilization, Skirmish, Memories)
 
@@ -115,24 +116,33 @@ class MemoriesServiceWrapper:
         return civilizations_score
 
     def report(self) -> Dict[str, Dict[str, int]]:
-        resolutions = {'cooperations': 0, 'conquests': 0, 'aggressions': 0}
+        resolutions = defaultdict(int)
+        sum_results = 0
+        score_reached = 0
         for skirmish in self._memories.skirmishes:
-            result = skirmish.result
-            if result == Result.COOPERATION:
-                key = 'cooperations'
-            elif result == Result.CONQUEST:
-                key = 'conquests'
-            else:
-                key = 'aggressions'
-            resolutions[key] += 1
+            sum_results += skirmish.result
+            score_reached += skirmish.combined_score
+            match skirmish.result:
+                case Result.COOPERATION:
+                    resolutions['cooperation'] += 1
+                case Result.CONQUEST:
+                    resolutions['conquest'] += 1
+                case Result.AGGRESSION:
+                    resolutions['aggression'] += 1
+                case Result.ALONE_WIN:
+                    resolutions['alone_win'] += 1
+                case Result.FAIL:
+                    resolutions['fail'] += 1
+                case _:
+                    raise ValueError("Invalid skirmish result")
 
         report = {
-            'skirmishes': self.length,
+            'fitness': "dummy",
+            'skirmishes_len': self.length,
             'max_score_reachable': Score.MAX_SCORE * self.length,
-            'score_reached': sum([
-                skirmish.combined_score
-                for skirmish in self._memories.skirmishes
-            ]),
+            'sum_results': sum_results,
+            'coefficient': sum_results / self.length,
+            'score_reached': score_reached,
             'resolutions': resolutions,
             'avg_planets_cost': sum([
                 skirmish.planet.cost

@@ -93,6 +93,7 @@ def end(context: dict, *_) -> None:
 
     context['max_score'] = Score.MAX_SCORE
     context['report'] = memories.report()
-    context['finished'] = True
+    context['report']['rounds_len'] = len(context['rounds'])
+    # context['finished'] = True
     context['memories'].save()
     context['summary'] = context['memories'].summary()

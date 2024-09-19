@@ -1,8 +1,19 @@
 Final game report
-Total skirmishes: {{ skirmishes }}
-Total score: {{ report['score_reached'] }} / {{ report['max_score_reachable'] }} | {{ report['score_reached'] / report['max_score_reachable'] }} %
-Resolutions:
-  - Cooperations: {{ report['resolutions']['cooperation'] }}
-  - Conquests: {{ report['resolutions']['conquest'] }}
-  - Aggressions: {{ report['resolutions']['aggression'] }}
+{%- set color_result = 'red' if report['sum_results'] < 0 else 'green' %}
+----
+    Fitness: {{ report['fitness'] }}
+
+    Total skirmishes: {{ report['skirmishes_len'] }}
+    Total rounds: {{ report['rounds_len'] }}
+    Avg planets cost: {{ report['avg_planets_cost'] | round(3) | string | rjust(5) }}
+    Total score: {{ report['score_reached'] }} / {{ report['max_score_reachable'] }} | {{ ((report['score_reached'] / report['max_score_reachable']) * 100) | round(1) | string | rjust(5) }} %
+    Total results: {{ report['sum_results'] | colorize(color_result) }} | {{ (report['coefficient'] * 100) | round(1) | string | rjust(5) | colorize(color_result) }} %
+    
+    Resolutions:
+      - Cooperations: {{ report['resolutions']['cooperation'] }}
+      - Conquests: {{ report['resolutions']['conquest'] }}
+      - Aggressions: {{ report['resolutions']['aggression'] }}
+      - Alone Wins: {{ report['resolutions']['alone_win'] }}
+      - Fail: {{ report['resolutions']['fail'] }}
+----
 Good bye {{ title | colorize('red') }}!
