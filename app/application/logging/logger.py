@@ -8,6 +8,8 @@ class CustomRootLogger(logging.RootLogger):
     last_checkpoint = 0
     init_checkpoint_custom = {}
     last_checkpoint_custom = {}
+    stopwatch_level: int = logging.DEBUG
+    stopwatch_ms_round: int = 2
 
     def start_stopwatch(self, name: str = None) -> None:
         if not name:
@@ -25,10 +27,10 @@ class CustomRootLogger(logging.RootLogger):
 
     def checkpoint_stopwatch(
         self,
+        name: str = None,
         message: str = None,
-        log_level: int = logging.DEBUG,
+        log_level: int = None,
         relative: bool = True,
-        name: str = None
     ) -> float:
         """milliseconds stopwatch.
 
@@ -45,6 +47,7 @@ class CustomRootLogger(logging.RootLogger):
         assert (self.init_checkpoint
                 or self.init_checkpoint_custom.get(name, None)), (
             "run start_stopwatch before end_stopwatch")
+        log_level = log_level or self.stopwatch_level
         assert not message or (message and log_level in logging._levelToName)
         current_time = time()
         # CASES: for is relative and is named
@@ -66,14 +69,17 @@ class CustomRootLogger(logging.RootLogger):
         else:
             self.last_checkpoint_custom[name] = current_time
         if message:
-            self.log(log_level, message.format(ms=ms))
+            self.log(
+                log_level,
+                message.format(ms=round(ms, self.stopwatch_ms_round))
+            )
         return ms
 
     def stop_stopwatch(
         self,
+        name: str = None,
         message: str = None,
-        log_level: int = logging.DEBUG,
-        name: str = None
+        log_level: int = None,
     ) -> int:
         return self.checkpoint_stopwatch(
             message=message,

@@ -1,7 +1,7 @@
 import init  # noqa: F401
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
-from app.infraestructure.screens import Screen
+from app.application.screens import Screen
 
 
 class TestScreen(TestCase):

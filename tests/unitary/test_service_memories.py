@@ -1,7 +1,8 @@
 import init  # noqa: F401
 from unittest import TestCase
 from unittest.mock import MagicMock, patch, PropertyMock
-from app.core.domain.models import Score, Position, Result, Skirmish
+from app.core.domain.models import (
+    Score, Position, Result, Skirmish, Planet, Civilization)
 from app.core.domain.services import MemoriesServiceWrapper
 
 
@@ -20,10 +21,17 @@ class TestModelMemories(TestCase):
             self.civilization_1: [(Position.COOPERATION, Score.LOSE,)],
             self.civilization_2: [(Position.AGGRESSION, Score.WIN,)],
         }
-        self.memories = MagicMock(name='memories', owner=None)
+        self.memories = MagicMock(name='memories', owner=None, owner_data={})
         self.memories.skirmishes.return_value = self.skirmishes
         self.memories.memories_ = [1, 2]
         self.memory_wrapped = MemoriesServiceWrapper(self.memories)
+        self.memories.skirmishes_by_civilization.return_value = {
+            self.civilization_1: [
+                (Position.COOPERATION, Score.LOSE,),
+                (Position.AGGRESSION, Score.WIN,),
+                (Position.AGGRESSION, Score.TIE_BAD,),
+            ]
+        }
 
     def test_instance_success(self):
         assert self.memory_wrapped._memories == self.memories
@@ -39,6 +47,24 @@ class TestModelMemories(TestCase):
 
     def test_length_success(self):
         assert self.memory_wrapped.length == 2
+
+    def test_own_info_success(self):
+        assert self.memory_wrapped.own_info == self.memories.owner_data
+        test_value = {
+            'str': 'value',
+            'int': 1,
+            'float': 1.1,
+            'bool': True,
+            'none': None,
+            'planet': Planet(name='planet', cost=100),
+            'civilzation': Civilization(
+                name='civilization', strategy=lambda: True, resources=100),
+            'to_filter': Score(0)
+        }
+        self.memory_wrapped.own_info = test_value
+        expected = test_value
+        del expected['to_filter']
+        assert expected == self.memory_wrapped.own_info
 
     def test_remembers_success(self):
         skirmish = MagicMock()
@@ -133,14 +159,16 @@ class TestModelMemories(TestCase):
             self.civilization_1, Result.is_mistake)
         assert mock_statiscs_method.return_value == response
 
+    @patch(
+        'app.core.domain.services.memories.MemoriesServiceWrapper._statistics'
+    )
+    def test_fails(self, mock_statiscs_method: MagicMock):
+        response = self.memory_wrapped.fails(self.civilization_1)
+        mock_statiscs_method.assert_called_once_with(
+            self.civilization_1, Result.is_failure)
+        assert mock_statiscs_method.return_value == response
+
     def test_score(self):
-        self.memories.skirmishes_by_civilization.return_value = {
-            self.civilization_1: [
-                (Position.COOPERATION, Score.LOSE,),
-                (Position.COOPERATION, Score.WIN,),
-                (Position.COOPERATION, Score.TIE_GOOD,),
-            ],
-        }
         expected = sum([
             score for position, score in (
                 self.memories.skirmishes_by_civilization.return_value[
@@ -211,35 +239,57 @@ class TestModelMemories(TestCase):
             'avg_planets_cost': 500 / 3
         }
 
-    def test_last_position_success(self):
-        self.memories.skirmishes_by_civilization.return_value = {
-            self.civilization_1: [
-                (Position.COOPERATION, Score.LOSE,),
-                (Position.AGGRESSION, Score.WIN,),
-            ]
-        }
-        response = self.memory_wrapped.last_position(self.civilization_1)
-        assert response == Position.AGGRESSION
+    def test_first_positions_success(self):
+        response = self.memory_wrapped.first_positions(self.civilization_1)
+        assert [Position.COOPERATION] == response
 
-    def test_last_position_not_found(self):
+    def test_first_positions_many_success(self):
+        response = self.memory_wrapped.first_positions(self.civilization_1, 2)
+        assert [Position.COOPERATION, Position.AGGRESSION] == response
+
+    def test_first_positions_not_found(self):
         self.memories.skirmishes_by_civilization.return_value = {}
-        response = self.memory_wrapped.last_position(self.civilization_1)
-        assert response is None
+        response = self.memory_wrapped.first_positions(self.civilization_1)
+        assert [] == response
 
-    def test_last_score_success(self):
-        self.memories.skirmishes_by_civilization.return_value = {
-            self.civilization_1: [
-                (Position.COOPERATION, Score.LOSE,),
-                (Position.AGGRESSION, Score.WIN,),
-            ]
-        }
-        response = self.memory_wrapped.last_score(self.civilization_1)
-        assert response == Score.WIN
+    def test_last_positions_success(self):
+        response = self.memory_wrapped.last_positions(self.civilization_1)
+        assert [Position.AGGRESSION] == response
 
-    def test_last_score_not_found(self):
+    def test_last_positions_many_success(self):
+        response = self.memory_wrapped.last_positions(self.civilization_1, n=2)
+        assert [Position.AGGRESSION, Position.AGGRESSION] == response
+
+    def test_last_positions_not_found(self):
         self.memories.skirmishes_by_civilization.return_value = {}
-        response = self.memory_wrapped.last_score(self.civilization_1)
-        assert response is None
+        response = self.memory_wrapped.last_positions(self.civilization_1)
+        assert [] == response
+
+    def test_first_scores_success(self):
+        response = self.memory_wrapped.first_scores(self.civilization_1)
+        assert [Score.LOSE] == response
+
+    def test_first_scores_many_success(self):
+        response = self.memory_wrapped.first_scores(self.civilization_1, n=2)
+        assert [Score.LOSE, Score.WIN] == response
+
+    def test_first_scores_not_found(self):
+        self.memories.skirmishes_by_civilization.return_value = {}
+        response = self.memory_wrapped.first_scores(self.civilization_1)
+        assert [] == response
+
+    def test_last_scores_success(self):
+        response = self.memory_wrapped.last_scores(self.civilization_1)
+        assert [Score.TIE_BAD] == response
+
+    def test_last_scores_many_success(self):
+        response = self.memory_wrapped.last_scores(self.civilization_1, n=2)
+        assert [Score.TIE_BAD, Score.WIN] == response
+
+    def test_last_scores_not_found(self):
+        self.memories.skirmishes_by_civilization.return_value = {}
+        response = self.memory_wrapped.last_scores(self.civilization_1)
+        assert [] == response
 
     def test_save_success(self):
         self.memory_wrapped.save()

@@ -1,7 +1,7 @@
 import init  # noqa: F401
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
-from app.core.domain.models import Score
+from app.core.domain.models import Cost
 from app.core.domain.services import PlanetService
 
 
@@ -25,8 +25,8 @@ class TestPlanetService(TestCase):
     ):
         planet = PlanetService.create(
             name="CustomPlanet",
-            cost=Score.COST_HIGH
+            cost=Cost.HIGH
         )
         mock_planet_namer.assert_not_called()
         assert planet.name == "CustomPlanet"
-        assert planet.cost == Score.COST_HIGH
+        assert planet.cost == Cost.HIGH

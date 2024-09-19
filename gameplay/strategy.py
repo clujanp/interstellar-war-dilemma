@@ -1,5 +1,5 @@
-from random import choice
-from app.core.domain.models import Civilization, Planet, Position
+from random import choice, random
+from .classes import Civilization, Memories, Position
 
 
 class BuiltInStrategies:
@@ -15,27 +15,54 @@ class BuiltInStrategies:
 
     @staticmethod
     def random(**_) -> bool:
-        from random import choice
-        return choice([Position.COOPERATION, Position.AGGRESSION])
+        return choice(Position.VALID_RESPONSE)
 
     @staticmethod
-    def reply_last(
-        self: Civilization, opponent: Civilization, **_
+    def tic_for_tac(
+        opponent: Civilization, memories: Memories, **_
     ) -> bool:
-        from random import choice
-        last_skirmish = self.memory.last_position(opponent)
-        if last_skirmish is not None:
-            return last_skirmish
-        return choice([Position.COOPERATION, Position.AGGRESSION])
+        last_positions = memories.last_positions(opponent)
+        if last_positions and last_positions[0] is not Position.FAIL:
+            return last_positions[0]
+        return Position.COOPERATION
 
+    @staticmethod
+    def friedman(
+        opponent: Civilization, memories: Memories, **_
+    ) -> bool:
+        aggressions = memories.aggressions(opponent)
+        if aggressions.percent > 0:
+            return Position.AGGRESSION
+        return Position.COOPERATION
 
-AVAILABLE_STRATEGIES = {
-    'always_cooperation': BuiltInStrategies.always_cooperation,
-    'always_aggression': BuiltInStrategies.always_aggression,
-    'random': BuiltInStrategies.random,
-    'reply_last': BuiltInStrategies.reply_last,
-}
+    @staticmethod
+    def joss(opponent: Civilization, memories: Memories, **_) -> bool:
+        if random() < 0.10:
+            return Position.AGGRESSION
+        last_positions = memories.last_positions(opponent)
+        if last_positions and last_positions[0] is not Position.FAIL:
+            return last_positions[0]
+        return Position.COOPERATION
 
+    @staticmethod
+    def sample(opponent: Civilization, memories: Memories, **_) -> bool:
+        if memories.skirmishes_count(opponent) >= 2:
+            last_positions = memories.last_positions(opponent, 2)
+            if last_positions == [Position.AGGRESSION, Position.AGGRESSION]:
+                return Position.AGGRESSION
+            return Position.COOPERATION
+        return Position.COOPERATION
 
-def select_random_builtin() -> callable:
-    return choice(list(AVAILABLE_STRATEGIES.values()))
+    @staticmethod
+    def tester(opponent: Civilization, memories: Memories, **_) -> bool:
+        count_skirmishes = memories.skirmishes_count(opponent)
+        if count_skirmishes == 1:
+            return Position.AGGRESSION
+        if count_skirmishes >= 2:
+            if memories.first_positions(opponent, 2)[1] == Position.AGGRESSION:
+                return memories.last_positions(opponent)[0]
+            if count_skirmishes % 2 == 0:
+                return Position.AGGRESSION
+            else:
+                return Position.COOPERATION
+        return Position.COOPERATION

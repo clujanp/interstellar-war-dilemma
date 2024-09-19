@@ -25,7 +25,15 @@ jobs:
     - name: Unitary tests
       env:
         SRC_FOLDER: ${{ vars.SRC_FOLDER }}
-        TESTS_FOLDER: ${{ vars.TESTS_FOLDER }}
+        TESTS_UNIT_FOLDER: ${{ vars.TESTS_UNIT_FOLDER }}
         COV_PERCENT: ${{ vars.COV_PERCENT }}
       run: |
-        pytest --tb=short --cov=${SRC_FOLDER}/ ${TESTS_FOLDER}/ --cov-fail-under=${COV_PERCENT}
+        pytest --tb=short --cov=${SRC_FOLDER}/ ${TESTS_UNIT_FOLDER}/ --cov-fail-under=${COV_PERCENT}
+
+    - name: Integration tests
+      env:
+        SRC_FOLDER: ${{ vars.SRC_FOLDER }}
+        TESTS_INTEGRATION_FOLDER: ${{ vars.TESTS_INTEGRATION_FOLDER }}
+        COV_PERCENT: ${{ vars.COV_PERCENT }}
+      run: |
+        pytest --tb=short ${TESTS_INTEGRATION_FOLDER}

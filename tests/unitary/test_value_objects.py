@@ -6,24 +6,37 @@ from app.core.domain.models.value_objects import (
 
 class TestScore(TestCase):
     def test_score_creation_success(self):
-        score = Score(Score.WIN)
-        assert score == Score.WIN
+        assert Score(Score.WIN) == Score.WIN
+        assert Score(Score.TIE_GOOD) == Score.TIE_GOOD
+        assert Score(Score.TIE_BAD) == Score.TIE_BAD
+        assert Score(Score.LOSE) == Score.LOSE
+        assert Score(Score.ALONE_WIN) == Score.ALONE_WIN
 
-    def test_score_creation_fail(self):
-        with self.assertRaises(AssertionError):
+    def test_score_creation_other_value(self):
+        with self.assertRaises(ValueError) as context:
             Score(10)
+        assert str(context.exception) == '10 is not a valid Score'
 
 
 class TestPosition(TestCase):
     def test_position_constants(self):
         assert Position.COOPERATION is True
         assert Position.AGGRESSION is False
+        assert Position.FAIL is None
 
 
 class TestResult(TestCase):
     def setUp(self):
-        self.positions = [Position.COOPERATION, Position.AGGRESSION]
+        self.positions = [
+            Position.COOPERATION, Position.AGGRESSION, Position.FAIL]
         self.scores = [Score.LOSE, Score.TIE_BAD, Score.TIE_GOOD, Score.WIN]
+
+    def test_result_constants(self):
+        assert Result.COOPERATION == 1
+        assert Result.CONQUEST == 0
+        assert Result.AGGRESSION == -1
+        assert Result.ALONE_WIN == -3
+        assert Result.FAIL == -5
 
     def test_was_cooperative(self):
         for posture in self.positions:
@@ -66,6 +79,15 @@ class TestResult(TestCase):
             for score in self.scores:
                 result = Result.is_mistake(posture, score)
                 if score in [Score.LOSE]:
+                    assert result is True
+                else:
+                    assert result is False
+
+    def test_is_failure(self):
+        for posture in self.positions:
+            for score in self.scores:
+                result = Result.is_failure(posture, score)
+                if posture is Position.FAIL:
                     assert result is True
                 else:
                     assert result is False

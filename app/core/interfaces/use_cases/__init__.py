@@ -1,9 +1,9 @@
 from typing import List, Callable, Tuple
 from app.core.domain.services import (
-    PlanetService, CivilizationService, SkirmishService, RoundService,
-    MemoriesServiceWrapper
+    PlanetService, StrategyService, CivilizationService, SkirmishService,
+    RoundService, MemoriesServiceWrapper
 )
-from app.core.domain.models import Planet, Civilization, Skirmish, Round
+from app.core.domain.models import Planet, Civilization, Skirmish, Round, Cost
 
 
 class PlanetUseCases:
@@ -12,6 +12,42 @@ class PlanetUseCases:
 
     def generate(self, quantity: int) -> List[Planet]:
         return [self.service.create() for _ in range(quantity)]
+
+
+class StrategiesUseCases:
+    def __init__(
+        self,
+        service: StrategyService,
+        planet_service: PlanetService,
+        civilization_service: CivilizationService,
+    ):
+        self.service = service
+        self.planet_service = planet_service
+        self.civilization_service = civilization_service
+
+    def load_strategies(self) -> dict[str, callable]:
+        strategies = self.service.load_strategies()
+        test_planet, test_self, test_opponent = self._get_test_entities()
+        valid_strategies = {}
+        for name, strategy in strategies.items():
+            strategy = self.service.mask_strategy(strategy)
+            if self.service.validate_strategy(
+                strategy, test_planet, test_self, test_opponent
+            ):
+                valid_strategies[name] = strategy
+        return valid_strategies
+
+    def _get_test_entities(self) -> Tuple[Planet, Civilization, Civilization]:
+        return (
+            self.planet_service.create(name="TestPlanet", cost=Cost.HIGH),
+            self.civilization_service.create(
+                name="Self", strategy=lambda: True, resources=0),
+            self.civilization_service.create(
+                name="TestOpponent", strategy=lambda: True, resources=0),
+        )
+
+    def select_random_builtin(self) -> callable:
+        return self.service.mask_strategy(self.service.select_random_builtin())
 
 
 class CivilizationUseCases:

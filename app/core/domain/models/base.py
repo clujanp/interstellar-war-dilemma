@@ -12,4 +12,4 @@ class Entity(BM):
         return hash(self.uid)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}: {str(self.uid)[-3:]}"
+        return f"<{self.__class__.__name__}: {str(self.uid)[-3:]}>"

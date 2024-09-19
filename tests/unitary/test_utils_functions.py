@@ -3,7 +3,7 @@ from unittest import TestCase
 from unittest.mock import patch
 from app.utils.functions import (
     replace_decimals, replace_to_decimal, cast_datetime_to_isoformat,
-    planet_namer
+    planet_namer, snake_to_pascal, to_snake
 )
 from decimal import Decimal
 from datetime import datetime
@@ -67,3 +67,15 @@ class TestFunctions(TestCase):
         mock_choice.side_effect = ['Xil', 'on', ' Prime']
         result = planet_namer()
         assert result == 'Xilon Prime'
+
+    def test_snake_to_pascal(self):
+        assert snake_to_pascal('hello_world') == 'Hello World'
+
+    def test_to_snake(self):
+        assert to_snake('HelloWorld') == 'hello_world'
+        assert to_snake('HELLO WORLD') == 'hello_world'
+        assert to_snake('HELLO-WORLD') == 'hello_world'
+        assert to_snake('hello-world') == 'hello_world'
+        assert to_snake('HelloWorld') == 'hello_world'
+        assert to_snake('Hello world') == 'hello_world'
+        assert to_snake('Hello__world') == 'hello__world'

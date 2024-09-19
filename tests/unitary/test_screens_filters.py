@@ -1,7 +1,7 @@
 import init  # noqa: F401
 from unittest import TestCase
 from unittest.mock import MagicMock
-from app.infraestructure.screens.filters import (
+from app.application.screens.filters import (
     colorize_text, bold_text, tabulate, ljust, rjust, center, uppercase,
     lowercase, _round
 )

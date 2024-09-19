@@ -43,3 +43,12 @@ def planet_namer() -> str:
 
 def snake_to_pascal(snake: str) -> str:
     return " ".join([word.capitalize() for word in snake.split("_")])
+
+
+def to_snake(name: str) -> str:
+    from re import sub as re_sub
+    return re_sub(
+        '[ -]+([A-Za-z0-9])', r'_\1', re_sub(
+            '([a-z0-9])([A-Z])', r'\1_\2', re_sub(
+                '(.)([A-Z][a-z]+)', r'\1_\2', name))
+    ).lower()

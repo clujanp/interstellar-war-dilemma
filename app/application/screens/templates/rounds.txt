@@ -1,0 +1,9 @@
+{% for round in rounds[-(n_last_rounds):] -%}
+{{ ('Round #' + round.number|string).center(84) }}
+{% for skirmish in round.skirmishes -%}
+    {%- set posture_1 = position_emoji[skirmish.posture_1] -%}
+    {%- set posture_2 = position_emoji[skirmish.posture_2] -%}
+    {%- set result = result_emoji[skirmish.result] -%}
+{{ skirmish.civilization_1.name | rjust(32) }} {{ posture_1 }} : {{ skirmish.score_1 }}  {{ result }}  {{ skirmish.score_2 }} : {{ posture_2 }} {{ skirmish.civilization_2.name | ljust(32) }}
+{% endfor -%}
+{% endfor -%}

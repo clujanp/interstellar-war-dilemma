@@ -3,7 +3,7 @@ from pydantic import Field
 from collections import defaultdict
 from app.utils.decorators import cached
 from .base import Entity
-from .value_objects import Score, Result
+from .value_objects import Score
 from .validations import (
     PlanetValidations, CivilizationValidations, SkirmishValidations,
     MemoriesValidations
@@ -27,7 +27,7 @@ class Planet(Entity, PlanetValidations):
         return f"{self.name} is colonized by '{self.colonizer_name}'"
 
     def __repr__(self):
-        return f"Planet: {self.name}"
+        return f"<Planet: {self.name}>"
 
 
 class Civilization(Entity, CivilizationValidations):
@@ -37,10 +37,10 @@ class Civilization(Entity, CivilizationValidations):
     memory: 'Memories' = Field(default_factory=lambda: Memories(owner=None))
 
     def __str__(self):
-        return f"{self.name} has {self.resources} resources"
+        return f"{self.name}"
 
     def __repr__(self):
-        return f"Civilization: {self.name}"
+        return f"<Civilization: {self.name}>"
 
 
 class Skirmish(Entity, SkirmishValidations):
@@ -52,6 +52,7 @@ class Skirmish(Entity, SkirmishValidations):
     winner_: Optional[List[Civilization]] = None
     score_1: Optional[int] = None
     score_2: Optional[int] = None
+    result: Optional[int] = None
 
     @property
     def civilizations(self) -> Tuple[Civilization, Civilization]:
@@ -60,16 +61,6 @@ class Skirmish(Entity, SkirmishValidations):
     @property
     def combined_score(self) -> int:
         return (self.score_1 or 0) + (self.score_2 or 0)
-
-    @property
-    def result(
-        self
-    ) -> Result.COOPERATION | Result.CONQUEST | Result.AGGRESSION:
-        if all([self.posture_1, self.posture_2]):
-            return Result.COOPERATION
-        if any([self.posture_1, self.posture_2]):
-            return Result.CONQUEST
-        return Result.AGGRESSION
 
     def behavior(self, civilization: Civilization) -> Tuple[bool, Score]:
         if civilization == self.civilization_1:
@@ -81,8 +72,16 @@ class Skirmish(Entity, SkirmishValidations):
     def __str__(self):
         if self.winner_ is None:
             return f"Skirmish in '{self.planet.name}' is disputing"
+        if self.winner_ == []:
+            return f"Skirmish in '{self.planet.name}' is fail for both"
         winners = ', '.join([c.name for c in self.winner_])
         return f"Skirmish in '{self.planet.name}' with winner {winners}"
+
+    def __repr__(self):
+        return (
+            f"<Skirmish: between {self.civilization_1.name} "
+            f"and {self.civilization_2.name} in {self.planet.name}>"
+        )
 
 
 class Round(Entity):
@@ -92,10 +91,17 @@ class Round(Entity):
     def __str__(self):
         return f"Round #{self.number} with {len(self.skirmishes)} skirmishes"
 
+    def __repr__(self):
+        return f"<Round: {self.number}>"
+
 
 class Memories(Entity, MemoriesValidations):
     owner: Optional[Civilization]
     memories_: List[Skirmish] = Field(default_factory=list)
+    owner_data: Dict[
+        str,
+        Optional[Planet | Civilization | str | int | float | bool]
+    ] = Field(default_factory=dict)
 
     def add(self, skirmish: Skirmish) -> None:
         self.memories_.append(skirmish)
@@ -148,3 +154,6 @@ class Memories(Entity, MemoriesValidations):
         if self.owner is not None:
             owner = f"{self.owner.name}'s "
         return f"{owner}Memories of {len(self.memories_)} skirmishes"
+
+    def __repr__(self):
+        return f"<Memories: {self.owner}>"

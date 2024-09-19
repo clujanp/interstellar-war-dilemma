@@ -41,9 +41,9 @@ def el_juan(
 def the_king(
     self: Civilization, planet: Planet, opponent: Civilization
 ) -> bool:
-    if self.memory.last_position(opponent) == Position.COOPERATION:
+    if self.memory.last_positions(opponent) == Position.COOPERATION:
         return True
-    if self.memory.last_position(opponent) == Position.AGGRESSION:
+    if self.memory.last_positions(opponent) == Position.AGGRESSION:
         return False
     return False
 
@@ -53,9 +53,9 @@ def el_juan_2(
 ) -> bool:
     # Si el oponente es conocido y hemos ganado en el pasado, atacamos
     if opponent in self.memory.civilizations():
-        last_score = self.memory.last_score(opponent)
+        last_scores = self.memory.last_scores(opponent)
         if (
-            last_score == Score.WIN or last_score
+            last_scores == Score.WIN or last_scores
             == Score.LOSE
         ):
             return False

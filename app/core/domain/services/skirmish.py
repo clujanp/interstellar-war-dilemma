@@ -1,9 +1,13 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Callable
 from app.core.domain.models import (
-    Score, Position, Planet, Civilization, Skirmish)
+    Score, Position, Result, Planet, Civilization, Skirmish)
+from app.config.messages import ERR_SKIRMISH_SERVICE as ERR_MSG
 
 
 class SkirmishService:
+    def __init__(self, resoluter: Dict[Tuple[Position, Position], Callable]):
+        self.RESOLUTER = resoluter
+
     @staticmethod
     def create(
         planet: Planet,
@@ -20,43 +24,38 @@ class SkirmishService:
     def results(skirmish: Skirmish) -> Tuple[List[Civilization], Score, Score]:
         return skirmish.winner_, skirmish.score_1, skirmish.score_2
 
-    @classmethod
     def resolve(
-        cls, skirmish: Skirmish
-    ) -> Tuple[List[Civilization], Score, Score]:
+        self, skirmish: Skirmish
+    ) -> Tuple[Tuple[Civilization], Score, Score]:
         if skirmish.winner_ is not None:
-            raise ValueError("Skirmish already resolved")
+            raise ValueError(ERR_MSG['already_resolved'])
 
         planet = skirmish.planet
         civilization_1 = skirmish.civilization_1
         civilization_2 = skirmish.civilization_2
 
-        skirmish.posture_1 = civilization_1.strategy(
+        posture_1 = civilization_1.strategy(
             self=civilization_1, planet=planet, opponent=civilization_2)
-        skirmish.posture_2 = civilization_2.strategy(
+        posture_2 = civilization_2.strategy(
             self=civilization_2, planet=planet, opponent=civilization_1)
 
-        if all([skirmish.posture_1, skirmish.posture_2]):
-            return cls._decide_winner(skirmish, Score.TIE_GOOD, Score.TIE_GOOD)
-        if not any([skirmish.posture_1, skirmish.posture_2]):
-            return cls._decide_winner(skirmish, Score.TIE_BAD, Score.TIE_BAD)
-        if skirmish.posture_1 is Position.AGGRESSION:
-            return cls._decide_winner(skirmish, Score.WIN, Score.LOSE)
-        return cls._decide_winner(skirmish, Score.LOSE, Score.WIN)
-
-    @staticmethod
-    def _decide_winner(
-        skirmish: Skirmish, score_1: Score, score_2: Score
-    ) -> Tuple[List[Civilization], Score, Score]:
-        if score_1 == score_2:
-            winners = [skirmish.civilization_1, skirmish.civilization_2]
-        elif score_1 > score_2:
-            winners = [skirmish.civilization_1]
-        else:
-            winners = [skirmish.civilization_2]
-
+        winner, score_1, score_2, result = self._decide_winner(
+            posture_1, posture_2, civilization_1, civilization_2)
+        skirmish.posture_1 = posture_1
+        skirmish.posture_2 = posture_2
+        skirmish.winner_ = winner
         skirmish.score_1 = score_1
         skirmish.score_2 = score_2
-        skirmish.winner_ = winners
-        skirmish.planet.colonizer = skirmish.winner_
-        return winners, score_1, score_2
+        skirmish.result = result
+
+        return winner, score_1, score_2, result
+
+    def _decide_winner(
+        self,
+        posture_1: Position,
+        posture_2: Position,
+        civilization_1: Civilization,
+        civilization_2: Civilization
+    ) -> Tuple[Tuple[Civilization], Score, Score, Result]:
+        resoluter = self.RESOLUTER[(posture_1, posture_2,)]
+        return resoluter(civilization_1, civilization_2)
