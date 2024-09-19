@@ -25,7 +25,7 @@ class Position:
     ALL = [COOPERATION, AGGRESSION, FAIL]
 
 
-class Result:
+class Result(IntEnum):
     COOPERATION = 1  # both cooperated
     CONQUEST = 0  # one cooperated and the other not
     AGGRESSION = -1  # both aggressed
