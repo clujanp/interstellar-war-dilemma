@@ -26,21 +26,31 @@ class Position:
 
 
 class Result:
-    COOPERATION = 1  # both cooperated
+    COOPERATION = 'coo'  # both cooperated
     CONQUEST = 0  # one cooperated and the other not
-    AGGRESSION = -1  # both aggressed
+    AGGRESSION = -3  # both aggressed
     ALONE_WIN = -3  # one cooperated and the other failed
     FAIL = -5  # both failed in take a decision
 
+    TO_VALUE = {
+        COOPERATION: 0,
+        CONQUEST: 0,
+        AGGRESSION: -3,
+        ALONE_WIN: -3,
+        FAIL: -5,
+    }
+
     was_cooperative = (  # noqa: E731
-        lambda posture, score: posture is Position.COOPERATION)
-    is_conquest = lambda posture, score: score == Score.WIN  # noqa: E731
+        lambda posture, _: posture == Position.COOPERATION)
+    was_aggresive = (   # noqa: E731
+        lambda posture, _: posture == Position.AGGRESSION)
+    was_fail = lambda posture, _: posture == Position.FAIL  # noqa: E731
+    is_conquest = lambda _, score: score == Score.WIN  # noqa: E731
     is_hit = (  # noqa: E731
-        lambda posture, score: score in [Score.WIN, Score.TIE_GOOD])
+        lambda _, score: score in [Score.WIN, Score.TIE_GOOD])
     is_lose = (  # noqa: E731
-        lambda posture, score: score in [Score.LOSE, Score.TIE_BAD])
-    is_mistake = lambda posture, score: score == Score.LOSE  # noqa: E731
-    is_failure = lambda posture, score: posture == Position.FAIL  # noqa: E731
+        lambda _, score: score in [Score.LOSE, Score.TIE_BAD])
+    is_mistake = lambda _, score: score == Score.LOSE  # noqa: E731
 
 
 class Statistic(int):

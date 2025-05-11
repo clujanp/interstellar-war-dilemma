@@ -83,10 +83,10 @@ class TestResult(TestCase):
                 else:
                     assert result is False
 
-    def test_is_failure(self):
+    def test_was_fail(self):
         for posture in self.positions:
             for score in self.scores:
-                result = Result.is_failure(posture, score)
+                result = Result.was_fail(posture, score)
                 if posture is Position.FAIL:
                     assert result is True
                 else:

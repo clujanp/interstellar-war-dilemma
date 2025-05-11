@@ -2,26 +2,26 @@ from typing import List, Tuple, Optional, Dict, Callable
 from pydantic import Field
 from collections import defaultdict
 from app.utils.decorators import cached
-from .base import Entity
-from .value_objects import Score
+from .base import Entity, NameableEntity
+from .value_objects import Score, Position, Result
 from .validations import (
     PlanetValidations, CivilizationValidations, SkirmishValidations,
     MemoriesValidations
 )
 
 
-class Planet(Entity, PlanetValidations):
-    name: str
+class Planet(NameableEntity, PlanetValidations):
     cost: int
     colonized: bool = False
     colonizer: Optional[List['Civilization']] = None
 
     @property
     def colonizer_name(self) -> str:
-        if self.colonizer:
-            return ' and '.join([
-                c.name for c in self.colonizer])
-        return '<nobody>'
+        return (
+            ' and '.join([c.name for c in self.colonizer])
+            if self.colonizer
+            else '<nobody>'
+        )
 
     def __str__(self):
         return f"{self.name} is colonized by '{self.colonizer_name}'"
@@ -30,8 +30,7 @@ class Planet(Entity, PlanetValidations):
         return f"<Planet: {self.name}>"
 
 
-class Civilization(Entity, CivilizationValidations):
-    name: str
+class Civilization(NameableEntity, CivilizationValidations):
     strategy: Callable
     resources: int
     memory: 'Memories' = Field(default_factory=lambda: Memories(owner=None))
@@ -47,12 +46,12 @@ class Skirmish(Entity, SkirmishValidations):
     planet: Planet
     civilization_1: Civilization
     civilization_2: Civilization
-    posture_1: Optional[bool] = None
-    posture_2: Optional[bool] = None
+    posture_1: Optional[Position] = None
+    posture_2: Optional[Position] = None
     winner_: Optional[List[Civilization]] = None
-    score_1: Optional[int] = None
-    score_2: Optional[int] = None
-    result: Optional[int] = None
+    score_1: Optional[Score] = None
+    score_2: Optional[Score] = None
+    result: Optional[Result] = None
 
     @property
     def civilizations(self) -> Tuple[Civilization, Civilization]:
@@ -62,12 +61,10 @@ class Skirmish(Entity, SkirmishValidations):
     def combined_score(self) -> int:
         return (self.score_1 or 0) + (self.score_2 or 0)
 
-    def behavior(self, civilization: Civilization) -> Tuple[bool, Score]:
+    def _behavior(self, civilization: Civilization) -> Tuple[Position, Score]:
         if civilization == self.civilization_1:
             return self.posture_1, self.score_1
-        if civilization == self.civilization_2:
-            return self.posture_2, self.score_2
-        raise ValueError("Civilization not in the skirmish")
+        return self.posture_2, self.score_2
 
     def __str__(self):
         if self.winner_ is None:
@@ -110,13 +107,13 @@ class Memories(Entity, MemoriesValidations):
 
     @property
     def civilizations(self) -> List[Civilization]:
-        return list(set([
+        return list(set(
             civilization
             for skirmish in self.memories_
             for civilization in (
                 skirmish.civilization_1, skirmish.civilization_2)
             if civilization != self.owner
-        ]))
+        ))
 
     @property
     def skirmishes(self) -> List[Skirmish]:
@@ -125,7 +122,7 @@ class Memories(Entity, MemoriesValidations):
     @cached
     def skirmishes_by_civilization(
         self
-    ) -> Dict[Civilization, List[Tuple[bool, Score]]]:
+    ) -> Dict[Civilization, List[Tuple[Position, Score]]]:
         civilizations = defaultdict(list)
         for skirmish in self.memories_:
             for civilization in (
@@ -134,7 +131,7 @@ class Memories(Entity, MemoriesValidations):
                 if civilization == self.owner:
                     continue
                 civilizations[civilization].append(
-                    skirmish.behavior(civilization))
+                    skirmish._behavior(civilization))
         return dict(civilizations)
 
     @cached

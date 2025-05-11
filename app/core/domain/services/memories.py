@@ -1,6 +1,8 @@
 from typing import List, Callable, Optional, Tuple, Dict
 from app.core.domain.models import (
-    Score, Result, Statistic, Planet, Civilization, Skirmish, Memories)
+    Position, Score, Result, Statistic, Planet, Civilization, Skirmish,
+    Memories
+)
 
 
 class MemoriesServiceWrapper:
@@ -43,6 +45,7 @@ class MemoriesServiceWrapper:
         return self._memories.skirmishes_count_by_civilization().get(
             civilization, 0)
 
+    # Positions and Scores by Civilization
     def first_positions(
         self, civilization: Civilization, n: int = 1
     ) -> List[bool]:
@@ -67,11 +70,15 @@ class MemoriesServiceWrapper:
         return self._get_position_or_score(
             civilization, n, score_instead_position=True, reverse=True)
 
+    # Statistics for Position by Civilization
     def cooperations(self, civilization: Civilization) -> Statistic:
         return self._statistics(civilization, Result.was_cooperative)
 
     def aggressions(self, civilization: Civilization) -> Statistic:
-        return self.cooperations(civilization).invert()
+        return self._statistics(civilization, Result.was_aggresive)
+
+    def fails(self, civilization: Civilization) -> Statistic:
+        return self._statistics(civilization, Result.was_fail)
 
     def conquests(self, civilization: Civilization) -> Statistic:
         return self._statistics(civilization, Result.is_conquest)
@@ -85,14 +92,8 @@ class MemoriesServiceWrapper:
     def mistakes(self, civilization: Civilization) -> Statistic:
         return self._statistics(civilization, Result.is_mistake)
 
-    def fails(self, civilization: Civilization) -> Statistic:
-        return self._statistics(civilization, Result.is_failure)
-
     def score(self, civilization: Civilization) -> int:
-        return sum([
-            score
-            for posture, score in self._skirmishes(civilization)
-        ])
+        return sum(score for _, score in self._skirmishes(civilization))
 
     def save(self) -> None:
         ...
@@ -129,15 +130,15 @@ class MemoriesServiceWrapper:
         report = {
             'skirmishes': self.length,
             'max_score_reachable': Score.MAX_SCORE * self.length,
-            'score_reached': sum([
+            'score_reached': sum(
                 skirmish.combined_score
                 for skirmish in self._memories.skirmishes
-            ]),
+            ),
             'resolutions': resolutions,
-            'avg_planets_cost': sum([
+            'avg_planets_cost': sum(
                 skirmish.planet.cost
                 for skirmish in self._memories.skirmishes
-            ]) / self.length,
+            ) / self.length,
         }
 
         return report
@@ -150,7 +151,7 @@ class MemoriesServiceWrapper:
         reverse: bool = False,
     ) -> List[Score | bool]:
         assert last > 0
-        skirmishes: List[Tuple[bool, Score]] = self._skirmishes(civilization)
+        skirmishes = self._skirmishes(civilization)
         if reverse:
             skirmishes.reverse()
         return [
@@ -160,17 +161,17 @@ class MemoriesServiceWrapper:
 
     def _skirmishes(
         self, civilization: Civilization
-    ) -> List[Tuple[bool, Score]]:
+    ) -> List[Tuple[Position, Score]]:
         return self._memories.skirmishes_by_civilization().get(
             civilization, [])
 
     def _statistics(
         self, civilization: Civilization, rule: Callable
     ) -> Statistic:
-        return Statistic(sum([
-            1 for posture, score in self._skirmishes(civilization)
-            if rule(posture, score)
-        ]), total=self.skirmishes_count(civilization))
+        return Statistic(sum(
+            1 for position, score in self._skirmishes(civilization)
+            if rule(position, score)
+        ), total=self.skirmishes_count(civilization))
 
     def __repr__(self) -> str:
         return f"<Memories owner={self.owner}>"

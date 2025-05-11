@@ -105,6 +105,21 @@ update_dependencies() {
     pip freeze > $requirements
 }
 
+# Show requirements of dependencies
+requirements_dependencies() {
+    venv_activate
+    set_requirements
+    while IFS= read -r package; do
+        package_name=$(echo "$package" | cut -d '=' -f 1)
+        dependencies=$(pip show "$package_name" | grep Requires | cut -d ':' -f 2 | tr -d ' ')
+        if [ -z "$dependencies" ]; then
+            echo "$package_name"
+        else
+            echo "$package_name: $dependencies"
+        fi
+    done < "$requirements"
+}
+
 # Install pylint
 install_lint() {
     venv_activate
@@ -237,6 +252,7 @@ help() {
     echo "    libs -i [lib1, lib2, ...]                 Install dependencies"
     echo "    libs -x [lib1, lib2, ...]                 Uninstall dependencies"
     echo "    libs -u                                   Update dependencies"
+    echo "    libs -r                                   show dependencies requirements"
     echo "  -- venv manage --"
     echo "    venv --create                             Create virtual environment"
     echo "    lint --install                            Install pylint"
@@ -303,6 +319,10 @@ case "$1" in
             -u)
                 set_env "${3:---env:dev}"
                 update_dependencies
+                ;;
+            -r)
+                set_env "${3:---env:dev}"
+                requirements_dependencies
                 ;;
             *)
                 help

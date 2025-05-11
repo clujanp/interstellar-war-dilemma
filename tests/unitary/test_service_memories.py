@@ -165,7 +165,7 @@ class TestModelMemories(TestCase):
     def test_fails(self, mock_statiscs_method: MagicMock):
         response = self.memory_wrapped.fails(self.civilization_1)
         mock_statiscs_method.assert_called_once_with(
-            self.civilization_1, Result.is_failure)
+            self.civilization_1, Result.was_fail)
         assert mock_statiscs_method.return_value == response
 
     def test_score(self):
