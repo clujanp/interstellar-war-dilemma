@@ -1,4 +1,0 @@
-Initials civilizations.
-
-{{ civilizations | tabulate('name', 'strategy', 'resources') }}
-
