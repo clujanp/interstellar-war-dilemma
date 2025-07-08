@@ -14,21 +14,22 @@ jobs:
       with:
         python-version: ${{ vars.PYTHON_VERSION }}
     
-    - name: Install dependencies
-      env:
-        REQUIREMENTS_DEV: ${{ vars.REQUIREMENTS_DEV}}
+    - name: Install uv
       run: |
-        python -m pip install --upgrade pip
-        pip install -r ${REQUIREMENTS_DEV}
-        pip install pytest pytest-cov coverage pylint
-        
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: |
+        uv sync --group dev
+          
     - name: Unitary tests
       env:
         SRC_FOLDER: ${{ vars.SRC_FOLDER }}
         TESTS_UNIT_FOLDER: ${{ vars.TESTS_UNIT_FOLDER }}
         COV_PERCENT: ${{ vars.COV_PERCENT }}
       run: |
-        pytest --tb=short --cov=${SRC_FOLDER}/ ${TESTS_UNIT_FOLDER}/ --cov-fail-under=${COV_PERCENT}
+        uv run pytest --tb=short --cov=${SRC_FOLDER}/ ${TESTS_UNIT_FOLDER}/ --cov-fail-under=${COV_PERCENT} --cov-report=xml --cov-report=term-missing
 
     - name: Integration tests
       env:
@@ -36,4 +37,11 @@ jobs:
         TESTS_INTEGRATION_FOLDER: ${{ vars.TESTS_INTEGRATION_FOLDER }}
         COV_PERCENT: ${{ vars.COV_PERCENT }}
       run: |
-        pytest --tb=short ${TESTS_INTEGRATION_FOLDER}
+        uv run pytest --tb=short ${TESTS_INTEGRATION_FOLDER}
+      
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: always()
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
