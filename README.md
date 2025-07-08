@@ -17,27 +17,30 @@
 - 📊 **Analysts**: Study emergent behavior patterns in multi-agent systems
 
 ## 🏗️ Architecture Overview
-
-  ```
-  📁 interstellar-war-dilemma/
-  ├── 📁 app/
-  │   └── 📁 core/
-  │       └── 📁 domain/
-  │           ├── models.py               # Entities
-  │           ├── models.spec.py          # Models tests
-  │           ├── value_objects.py        # Immutable value types
-  │           └── value_objects.spec.py   # Value objects tests
-  ├── 📁 doc/
-  │   ├── DEVELOPER_TASKS.md
-  │   ├── API_REFERENCE.md
-  │   ├── STRATEGY_GUIDE.md
-  │   └── 📁 assets/
-  ├── 📁 config/
-  ├── Dockerfile
-  ├── docker-compose.yml
-  └── pyproject.toml
-  ```
-
+```
+📁 interstellar-war-dilemma/
+├── 📁 app/
+│   └── 📁 core/
+│       └── 📁 domain/
+│           ├── models.py               # Entities
+│           ├── value_objects.py        # Immutable value types
+├── 📁 tests/
+│   ├── 📁 unit/
+│   │   ├── models_test.py              # Unit tests for models
+│   │   └── value_objects_test.py       # Unit tests for value objects
+│   └── 📁 integration/
+│       ├── domain_integration_test.py  # Integration tests for domain
+│       └── system_integration_test.py  # Full system integration tests
+├── 📁 doc/
+│   ├── DEVELOPER_TASKS.md
+│   ├── API_REFERENCE.md
+│   ├── STRATEGY_GUIDE.md
+│   └── 📁 assets/
+├── 📁 config/
+├── Dockerfile
+├── docker-compose.yml
+└── pyproject.toml
+```
 
 ### Phase 1: Core Foundation (In Progress)
 ```
