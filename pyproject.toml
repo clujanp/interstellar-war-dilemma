@@ -1,0 +1,9 @@
+[project]
+name = "interstellar-war-dilemma"
+version = "0.1.0"
+description = "is a strategic simulation game based on the Prisoner's Dilemma in a space exploration context"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.11.7",
+]
