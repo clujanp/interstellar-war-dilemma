@@ -36,7 +36,7 @@ jobs:
         uv run pylint ${SRC_FOLDER}/ ${TEST_FOLDER}/ --fail-under=${PYLINT_SCORE} --output-format=text > pylint_report.txt
 
     - name: Upload linter report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pylint-report
         path: pylint_report.txt
