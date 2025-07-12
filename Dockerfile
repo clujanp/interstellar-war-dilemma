@@ -1,15 +1,30 @@
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
-COPY config/requirements/development.txt config/requirements/development.txt
-COPY app/ .
+# Install uv
+RUN pip install --no-cache-dir uv
 
-RUN pip install --no-cache-dir -r config/requirements/development.txt
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
 
-EXPOSE 5000
+# Install dependencies
+RUN uv sync --frozen --no-dev
 
-COPY config/docker/start-app.sh /start-app.sh
-RUN chmod +x /start-app.sh
+# Copy application code
+COPY app/ ./app/
+COPY main.py ./
 
-ENTRYPOINT ["/start-app.sh"]
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash app && \
+    chown -R app:app /app
+USER app
+
+# Expose port (if needed for future web interface)
+EXPOSE 8000
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Run the application
+CMD ["uv", "run", "python", "main.py"]
