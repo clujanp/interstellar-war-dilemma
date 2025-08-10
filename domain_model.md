@@ -154,22 +154,30 @@ Title: Resolucion de un Skirmish
 - **Traición**: El agresor gana más (83% vs 0%)
 - **Inacción total**: AstronomyBody se marca como DISPUTED, si se repite → LOST permanentemente
 
+### 🎯 Rangos de AstronomyBodies:
+- **Asteroid**: Costo 1, Producción 1 *(abundante, bajo riesgo)*
+- **Moon**: Costo 2, Producción 2 *(equilibrado)*
+- **Planet**: Costo 3, Producción 3 *(alto valor, alto riesgo)*
+
 ---
 
 ## 🎯 Flujo de Procesos
 
 ### **Proceso: Ejecutar Skirmish**
 ```mermaid
-graph TD
-    A[Crear Skirmish] --> B{¿Ambas civs pueden pagar?}
-    B -->|No| C[Cancelar Skirmish]
-    B -->|Sí| D[Cobrar costos de colonización]
-    D --> E[Solicitar decisiones a estrategias]
-    E --> F[Aplicar matriz de resolución]
-    F --> G[Calcular producción con eficiencia]
-    G --> H[Distribuir recursos según shares]
-    H --> I[Registrar en memorias]
-    I --> J[Finalizar Skirmish]
+flowchart LR
+    A((Skirmish a resolver)) --> B{¿Ambas civs pueden pagar?}
+    B -->|No| C[Cancelar Skirmish] --> J
+    B -->|Sí| 
+    subgraph Proceso Skirmish [Ejecutar Skirmish]
+      direction TB
+      D[Cobrar costos de colonización]
+      D --> E[Solicitar decisiones a estrategias]
+      E --> F[Aplicar matriz de resolución]
+      F --> G[Calcular producción con eficiencia]
+      G --> I[Registrar en memorias]
+    end
+    I --> J((Finalizar Skirmish))
 ```
 
 ### **Proceso: Ejecutar Época**
@@ -188,20 +196,22 @@ graph TD
 
 ## 🧠 Sistema de Memoria Global
 
-### **MemoryEntry** (Objeto de Valor)
+### **MemoryEntry** (Entity)
 ```
+- id: MemoryEntryId
 - skirmish_id: SkirmishId
 - civ_a_id: CivilizationId
 - civ_b_id: CivilizationId
 - astronomy_body_id: AstronomyBodyId
+- astronomy_body_production: Int (0-3)
 - decision_a: Position
 - decision_b: Position
 - efficiency_a: Float (0.0-1.0)
 - efficiency_b: Float (0.0-1.0)
+- resources_gained_a: Float
+- resources_gained_b: Float
 - astronomy_body_status: AstronomyBodyStatus
 - epoch: Int
-- resources_gained_a: Resources
-- resources_gained_b: Resources
 ```
 
 ### **MemoryAccess** (Filtro por Civilización)
@@ -228,12 +238,20 @@ graph TD
 ### **Strategy Protocol**
 ```python
 def decide(
-    astronomy_body: AstronomyBody,
-    opponent: Civilization,
-    memory_access: MemoryAccess,  # Acceso filtrado a memorias
-    current_resources: Resources
+    astronomy_body: AstronomyBody,  # Incluye costo y producción
+    opponent: Civilization,         # Info básica del oponente
+    memory_access: MemoryAccess,    # Acceso filtrado a memorias
+    current_resources: Int          # Recursos actuales (0-6+)
 ) -> Position
 ```
+
+### **Invariantes del Dominio**:
+- Las civilizaciones inician con 6 recursos
+- Los recursos nunca pueden ser negativos
+- Cada época, todas las civilizaciones deben participar
+- AstronomyBodies producen entre 0-3 recursos
+- Costos de colonización van de 0-3 recursos
+- Eficiencias de la matriz siempre suman ≤ 100% por par
 
 ### **Ejemplos de Estrategias**:
 1. **AlwaysCooperate**: Siempre coopera
