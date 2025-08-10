@@ -61,12 +61,42 @@
 
 ## 🔄 Objetos de Valor
 
-### **Resources**
+### **Resources** `Float`
+Cantidad de recursos a nivel general.
+
+### **ResourceRange** `Range[x, y]`
+Rango de recursos.
+- Limite superior e inferior arbitrarios para recursos
+1. Verificar si un valor está dentro del rango
+
+### **ResourceProduction** `FloatEnum[Resources]`
+- base_production: Int (0-3) - Producción base del AstronomyBody por época
+- efficiency_a: Float (0.0-1.0) - Eficiencia obtenida por Civ A
+- efficiency_b: Float (0.0-1.0) - Eficiencia obtenida por Civ B
++ calculateActualProduction(efficiency): Float
+
+### **Participation**  `Float`
+Porcentaje de participación en la producción de recursos.
+
+### **ParticipationStandard**  `FloatEnum`
+Valores estandar sobre porcentaje de participación en la producción de recursos.
+- `COOPERATION`: `0.5`
+- `CONQUEST`: `0.83`
+- `NOTHING`: `0.0`
+
+### **Example: Distribución de Recursos**
 ```
-- energy: Int
-- materials: Int  
-- population: Int
-+ operaciones inmutables (add, subtract, multiply)
+🌙 Luna (base_production: 3)
+   ├─ Skirmish: Civ_A(COOPERATE) vs Civ_B(COOPERATE)
+   ├─ Matriz: A=50% | B=50% 
+   ├─ Distribución: A=1.5 | B=1.5
+   └─ Resultado: Ambas reciben 1.5 recursos → A+2, B+2 (redondeado)
+
+🪨 Asteroid (base_production: 1)  
+   ├─ Skirmish: Civ_A(ATTACK) vs Civ_B(COOPERATE)
+   ├─ Matriz: A=83% | B=0%
+   ├─ Distribución: A=0.83 | B=0
+   └─ Resultado: Solo A recibe 1 recurso
 ```
 
 ### **Position** (Enum)
@@ -80,10 +110,17 @@
 ```
 - decision_a: Position
 - decision_b: Position
-- efficiency_a: Float (0.0-1.0) - Eficiencia individual de Civ A
-- efficiency_b: Float (0.0-1.0) - Eficiencia individual de Civ B
+- efficiency_a: Float (0.0-1.0) - % de recursos que recibe Civ A
+- efficiency_b: Float (0.0-1.0) - % de recursos que recibe Civ B
 - both_control: Boolean
-- astronomy_body_status: AstronomyBodyStatus (CONTROLLED, DISPUTED, LOST)
+- astronomy_body_status: AstronomyBodyStatus
+```
+
+### **SkirmishStatus** (Enum)
+```
+- CREATED: Skirmish creado, esperando ejecución
+- EXECUTED: Costos pagados, decisiones tomadas
+- RESOLVED: Recursos distribuidos, guardado en memoria
 ```
 
 ### **AstronomyBodyStatus** (Enum)
