@@ -375,3 +375,7 @@ def decide(
 - Patrones de comportamiento emergentes
 - Astronomy bodies más disputados
 - Evolución de estrategias a lo largo del tiempo
+
+
+## 📖 Glossary
+- **Tick**: Una iteración del juego con determinada duracion de tiempo, donde se ejecutan todos los *Events* y `Skirmishes` en una `Epoch`.
