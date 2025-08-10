@@ -93,7 +93,52 @@
 - LOST: Nadie hizo nada, el AstronomyBody se pierde permanentemente
 ```
 
----
+
+## 🧩 Relaciones entre Entidades
+
+```mermaid 
+flowchart LR
+    Game --> Epoch
+    Game --> Civilization
+    subgraph SkirmishGroup [Skirmishes]
+        Civilization --Position--> Skirmish --> AstronomyBody
+        Skirmish --> Epoch --> Memories --> Civilization
+        AstronomyBody --> ResourceProduction
+        ResourceProduction --Resources--> Civilization
+    end
+    Game --> Memories
+```
+
+```mermaid 
+sequenceDiagram
+Title: Iteracion de Época (Tick)
+  Game->>Epoch: Iniciar nueva época
+  Epoch->>Memories: Registrar en Memories
+  Epoch->>Prod: 
+  Prod->>Civs: Abonar recursos
+  Epoch->>AstroBody: Generar AstronomyBodies aleatorios
+  Epoch->>Skirmishes: Crear skirmishes
+  Skirmishes->>Skirmishes: Resolver skirmishes
+  Skirmishes->>Epoch: 
+  Epoch->>Memories: Cerrar Epoch en Memories
+  Epoch->>Game: Finalizar época
+  Memories->>Game: actualizar estadísticas
+```
+
+```mermaid 
+sequenceDiagram
+Title: Resolucion de un Skirmish
+  Skirmish->>AstroBody: Consultar costo y producción
+  Skirmish->>CivA: Cobrar costo de colonización
+  Skirmish->>CivB: Cobrar costo de colonización
+  Memories->>CivA: Proporcionar Analisis histórico Oponente
+  Skirmish->>CivA: Solicitar decisión (COO/ATK)
+  Skirmish->>CivB: Solicitar decisión (COO/ATK)
+  Skirmish->>Skirmish: Registrar resultado
+  Skirmish->>Epoch: Marcar skirmish como resuelto
+```
+
+
 
 ## 📊 Matriz de Resolución de Skirmishes
 
