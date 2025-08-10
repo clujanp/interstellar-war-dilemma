@@ -4,40 +4,60 @@
 
 ### 🏛️ Entidades Principales
 
-#### **Civilization** (Entidad Central)
-- **Identidad**: Única por ID
-- **Responsabilidades**:
-  - Mantener recursos actuales
-  - Ejecutar estrategia de decisión
-  - Recordar encuentros pasados
-  - Pagar costos de colonización
-  - Recibir recursos de producción
+#### 🏴‍☠️ **Civilization** (Entidad Central)
+  - **Estado**: `ACTIVE` -> (`DECLINING`, `DEAD`)
+  - **Recursos**: `Resources` (Valor)
+  1. Mantener recursos actuales
+  2. Recibir recursos de producción por Epoca
+  3. Pagar costos de colonización
+  4. Ejecutar estrategia de decisión (Area de acción del jugador)
 
-#### **AstronomyBody** (Entidad de Valor)
-- **Identidad**: Única por ID
-- **Responsabilidades**:
-  - Definir costo de colonización
-  - Generar recursos por época
-  - Ser el objetivo de disputa
+#### 🪐 **AstronomyBody** (Entity)
+  - **Estado**: `AVAILABLE` -> (`DISPUTED`, `LOST`)
+  - **Costo de Colonización**: `ResourceRange` (0-5)
+  - **Produccion**: `ResourceRange` (0-3)
+  1. Ser el objetivo de disputa
 
-#### **Skirmish** (Entidad de Proceso)
-- **Identidad**: Única por ID
-- **Responsabilidades**:
-  - Orquestar disputa entre dos civilizaciones
-  - Cobrar costos de entrada
-  - Recolectar decisiones
-  - Resolver resultado según matriz
-  - Distribuir recursos
+#### 💰 **ResourceProduction** (Entity)
+  - **Civilizacion**: `Civilization`
+  - **AstronomyBody**: `AstronomyBody`
+  - **Participación**: `Participation` (IntEnum)
+  1. Resolver producción de recursos según participación
 
-#### **Game** (Entidad Raíz/Agregado)
-- **Identidad**: Única por ID
-- **Responsabilidades**:
-  - Gestionar múltiples civilizaciones
-  - Crear encounters aleatorios
-  - Avanzar épocas
-  - Mantener estadísticas globales
+#### ⚔️ **Skirmish** (Entity)
+  - **Estados**: `CREATED` → `EXECUTED` → `RESOLVED`
+  - **Civilizacion A**: `Civilization`
+  - **Civilizacion B**: `Civilization`
+  - **Decision A**: `Position`
+  - **Decision B**: `Position`
+  - **Resultado para A**: `SkirmishResult`
+  - **Resultado para B**: `SkirmishResult`
+  - **Producción A**: `ResourceProduction`
+  - **Producción B**: `ResourceProduction`
+  1. Cobrar costos de colonizacion
+  2. Resolver resultado según matriz
+  3. Definir porcentajes de produccion de recursos
 
----
+#### 🕰️ **Epoch** (Entity)
+  - **Estado**: `FUTURE` -> `CURRENT` -> `HISTORIC`
+  - **Skirmishes**: Lista de `Skirmish`
+  1. Generar AstronomyBodies aleatorios
+  2. Agrupar todos los skirmishes de una ronda
+
+#### 🧠 **Memories** (Entity)
+  - **Epocas**: Lista de `Epoch`
+  - **Propietario**: `Civilization`
+  1. Registrar epocas de skirmishes filtrando por propietario
+  2. Permitir análisis histórico
+  3. Permitir consultas avanzadas
+
+#### 🎮 **Game** (Aggregate Root)
+  - **Civilizaciones**: Lista de `Civilization`
+  - **Memorias**: Lista de `Memories`
+  1. Orquestar épocas secuenciales
+  2. Mantener estadísticas globales
+  3. Controlar estados de muerte
+  4. Asegurar participación de todas las civilizaciones
 
 ## 🔄 Objetos de Valor
 
