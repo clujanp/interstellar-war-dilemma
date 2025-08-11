@@ -1,5 +1,7 @@
 # 🚀 Análisis de Dominio: Interstellar War Dilemma
 
+Conceptos del dominio para el juego, el core se basa en la toma de decisiones estratégicas entre 2 adversarios en un contexto de exploración espacial y colonización de cuerpos astronómicos. la desicion es simple, cooperar,  atacar o retirarse. El juego se desarrolla en rondas (épocas) donde las civilizaciones deben decidir cómo interactuar con los cuerpos astronómicos descubiertos y entre ellas mismas.
+
 ## 📋 Conceptos del Dominio
 
 ### 🏛️ Entidades Principales
@@ -14,14 +16,14 @@
 
 #### 🪐 **AstronomyBody** (Entity)
   - **Estado**: `AVAILABLE` -> (`DISPUTED`, `LOST`)
-  - **Costo de Colonización**: `ResourceRange` (0-5)
-  - **Produccion**: `ResourceRange` (0-3)
+  - **Costo de Colonización**: `ResourceEnum` (0-5)
+  - **Produccion**: `ResourceEnum` (0-3)
   1. Ser el objetivo de disputa
 
 #### 💰 **ResourceProduction** (Entity)
   - **Civilizacion**: `Civilization`
   - **AstronomyBody**: `AstronomyBody`
-  - **Participación**: `Participation` (IntEnum)
+  - **Participación**: `Participation` (FloatEnum)
   1. Resolver producción de recursos según participación
 
 #### ⚔️ **Skirmish** (Entity)
@@ -61,78 +63,118 @@
 
 ## 🔄 Objetos de Valor
 
-### **Resources** `Float`
+### 💰 **Resources** `Float`
 Cantidad de recursos a nivel general.
 
-### **ResourceRange** `Range[x, y]`
+### 💳 **ResourceRange** `Range[x, y]`
 Rango de recursos.
 - Limite superior e inferior arbitrarios para recursos
 1. Verificar si un valor está dentro del rango
 
-### **ResourceProduction** `FloatEnum[Resources]`
-- base_production: Int (0-3) - Producción base del AstronomyBody por época
-- efficiency_a: Float (0.0-1.0) - Eficiencia obtenida por Civ A
-- efficiency_b: Float (0.0-1.0) - Eficiencia obtenida por Civ B
-+ calculateActualProduction(efficiency): Float
+### 🪙 **ResourcesEnum** `IntEnum`
+Valores puntuales de `Resources`.
 
-### **Participation**  `Float`
-Porcentaje de participación en la producción de recursos.
+### 🪐 **AstroBodyResourcesProduction** `ResourcesEnum`
+- `NONE`: `0`
+- `LOW`: `1`
+- `MEDIUM`: `2`
+- `HIGH`: `3`
 
-### **ParticipationStandard**  `FloatEnum`
-Valores estandar sobre porcentaje de participación en la producción de recursos.
-- `COOPERATION`: `0.5`
-- `CONQUEST`: `0.83`
-- `NOTHING`: `0.0`
+### 💸 **AstroBodyResourceCost** `ResourcesEnum`
+- `WITH_INFRAESTRUCTURE`: `0`
+- `TERRAFORMED`: `1`
+- `HABITABLE`: `2`
+- `NEED_TERRAFORM`: `3`
+- `HOSTILE`: `4`
+- `EXTREME`: `5`
 
-### **Example: Distribución de Recursos**
-```
-🌙 Luna (base_production: 3)
-   ├─ Skirmish: Civ_A(COOPERATE) vs Civ_B(COOPERATE)
-   ├─ Matriz: A=50% | B=50% 
-   ├─ Distribución: A=1.5 | B=1.5
-   └─ Resultado: Ambas reciben 1.5 recursos → A+2, B+2 (redondeado)
+### 🤺 **Position** `Enum`
+- 🤝 `COOPERATE`: Decisión colaborativa
+- ⚔️ `ATTACK`: Decisión agresiva  
+- 🤡 `NOTHING`: Fallo en decisión o declinacion por retiro
 
-🪨 Asteroid (base_production: 1)  
-   ├─ Skirmish: Civ_A(ATTACK) vs Civ_B(COOPERATE)
-   ├─ Matriz: A=83% | B=0%
-   ├─ Distribución: A=0.83 | B=0
-   └─ Resultado: Solo A recibe 1 recurso
-```
+### 🥧 **Participation**  `Float`
+Porcentaje de participación en la producción de recursos (`ResourceProduction`) para una `Civilization`.
 
-### **Position** (Enum)
-```
-- COOPERATE: Decisión colaborativa
-- ATTACK: Decisión agresiva  
-- NOTHING: Fallo en decisión o inacción
-```
+### 🍰 **ParticipationStandard**  `FloatEnum`
+Valores estandar sobre porcentaje de participación en la producción de recursos (`ResourceProduction`).
+| Resultado        | Eficiencia | Position (A) | Opponent Position (B) |
+|------------------|------------|--------------|-----------------------|
+| 🟡 `COOPERATION` | `0.5`      | `COOPERATE`  | `COOPERATE`           |
+| 🟢 `ASIMILATION` | `0.83`     | `COOPERATE`  | `NOTHING`             |
+| 🟡 `MASSACRE`    | `0.66`     | `ATTACK`     | `NOTHING`             |
+| 🟠 `CONFLICT`    | `0.17`     | `ATTACK`     | `ATTACK`              |
+| 🔴 `NOTHING`     | `0.0`      | `NOTHING`    | `NOTHING`             |
+1. Determinar el porcentaje de participación para una Civ, en función de la decisiónes tomada y la de oponente.
 
-### **SkirmishResult**
-```
-- decision_a: Position
-- decision_b: Position
-- efficiency_a: Float (0.0-1.0) - % de recursos que recibe Civ A
-- efficiency_b: Float (0.0-1.0) - % de recursos que recibe Civ B
-- both_control: Boolean
-- astronomy_body_status: AstronomyBodyStatus
-```
+### 🤼 **SkirmishResult** `Enum`
+Consideracion del resultado de un skirmish entre dos civilizaciones.
+| Resultado          | Decisión A        | Decisión B         | Eficiencia (%) |
+|--------------------|-------------------|--------------------|----------------|
+| 🔵 **COOPERATION** | 🤝 `COOPERATE`    | 🤝 `COOPERATE`     | 100%           |
+| 🟢 **TREASON**     | ⚔️ `ATTACK`       | 🤝 `COOPERATE`     | 83%            |
+| 🟠 **CONFLICT**    | ⚔️ `ATTACK`       | ⚔️ `ATTACK`        | 33%            |
+| 🟢 **ASIMILATION** | 🤝 `COOPERATE`    | 🤡 `NOTHING`       | 83%            |
+| 🟡 **MASSACRE**    | ⚔️ `ATTACK`       | 🤡 `NOTHING`       | 66%            |
+| 🔴 **LOOSE**       | 🤡 `NOTHING`      | 🤡 `NOTHING`       | 0%             |
 
-### **SkirmishStatus** (Enum)
-```
-- CREATED: Skirmish creado, esperando ejecución
-- EXECUTED: Costos pagados, decisiones tomadas
-- RESOLVED: Recursos distribuidos, guardado en memoria
-```
+### 🚦 **SkirmishStatus** `Enum`
+- `CREATED`: Skirmish creado, esperando ejecución
+- `EXECUTED`: Costos pagados, decisiones tomadas
+- `RESOLVED`: Recursos distribuidos, guardado en memoria
 
-### **AstronomyBodyStatus** (Enum)
-```
-- CONTROLLED: Al menos una civilización obtuvo recursos
-- DISPUTED: Ambas civilizaciones fallaron, se vuelve a disputar next epoch
-- LOST: Nadie hizo nada, el AstronomyBody se pierde permanentemente
-```
+### 🎴 **AstronomyBodyStatus** `Enum`
+- `DISCOVERED`: AstronomyBody descubierto, esperando disputa
+- `CONTROLLED`: Al menos una civilización obtuvo recursos
+- `DISPUTED`: Ambas civilizaciones fallaron, se vuelve a disputar en la siguiente época
+### 🔭 **AstronomyBodyType** `StrEnum`
+| Subtipo               | Categoría     | Producción | Costo | Descripción / Efectos | Rareza       |
+|-----------------------|---------------|------------|-------|-----------------------|--------------|
+| `EXOPLANET`           | 🪐 Planeta    | 2-3        | 2-4   | Exploración avanzada  | Raro         |
+| `MINOR_PLANET`        | 🪐 Planeta    | 1          | 0-1   | Fácil de colonizar    | Común        |
+| `DWARF_PLANET`        | 🪐 Planeta    | 1-2        | 1-2   | Terraformación moderada| Poco común   |
+| `GAS_GIANT`           | 🪐 Planeta    | 3          | 5     | Recursos fluctuantes  | Poco común   |
+| `ICE_GIANT`           | 🪐 Planeta    | 2          | 5     | Bonificación defensa  | Poco común   |
+| `ROCKY_PLANET`        | 🪐 Planeta    | 1          | 0-1   | Acceso fácil          | Común        |
+| `VOLCANIC_PLANET`     | 🪐 Planeta    | 1-3        | 3     | Eventos aleatorios    | Raro         |
+| `OCEAN_WORLD`         | 🪐 Planeta    | 2          | 4     | Exploración especial  | Raro         |
+| `DESERT_PLANET`       | 🪐 Planeta    | 1          | 0-1   | Colonización fácil    | Común        |
+| `FOREST_WORLD`        | 🪐 Planeta    | 2          | 2     | Bonificación ecológica| Muy raro     |
+| `TOXIC_WORLD`         | 🪐 Planeta    | 1          | 4     | Efectos negativos     | Raro         |
+| `MAGNETIC_PLANET`     | 🪐 Planeta    | 1-3        | 3     | Tecnología especial   | Raro         |
+| `RADIATION_WORLD`     | 🪐 Planeta    | 1          | 5     | Penalización recursos | Raro         |
+| `TIDAL_LOCKED_PLANET` | 🪐 Planeta    | 1-3        | 3     | Eventos de ciclo      | Raro         |
+| `BINARY_PLANET`       | 🪐 Planeta    | 3          | 5     | Producción combinada  | Muy raro     |
+| `MOON`                | 🌙 Luna       | 2          | 1     | Colonización inicial  | Común        |
+| `CAPTURED_MOON`       | 🌙 Luna       | 1          | 0-1   | Bajo riesgo           | Poco común   |
+| `ASTEROID`            | 🪨 Asteroide  | 1          | 0-1   | Minería abundante     | Común        |
+| `ASTEROID_BELT`       | 🪨 Asteroide  | 1          | 1     | Producción constante  | Poco común   |
+| `COMET`               | 🪨 Asteroide  | 1-3        | 3     | Eventos únicos        | Raro         |
+| `STAR`                | ⭐ Estelar    | 3          | 5     | Energía principal     | Raro         |
+| `QUASAR`              | ⭐ Estelar    | 3          | 5     | Evento de radiación   | Muy raro     |
+| `PULSAR`              | ⭐ Estelar    | 2          | 5     | Tecnología y memoria  | Muy raro     |
+| `BLACK_HOLE`          | ⭐ Estelar    | 0-3        | 5     | Teletransporte        | Muy raro     |
+| `NEBULA`              | ⭐ Estelar    | 2          | 4     | Colonización especial | Raro         |
+| `DARK_MATTER_CLUSTER` | ⭐ Estelar    | 1-3        | 5     | Bonificación tecnológica| Muy raro   |
+| `GALAXY_CORE`         | ⭐ Estelar    | 3          | 5     | Eventos finales       | Extremo raro |
+| `SPACE_STATION`       | 🏗️ Artificial | 2          | 4     | Defensa y alianzas    | Poco común   |
+| `STELLAR_STRUCTURE`   | 🏗️ Artificial | 1-3        | 3-4   | Efectos especiales    | Muy raro     |
+| `DYSON_SPHERE`        | 🏗️ Artificial | 3          | 5     | Mecánica de victoria  | Extremo raro |
+| `RING_WORLD`          | 🏗️ Artificial | 3          | 5     | Bonificación global   | Muy raro     |
+| `PLANETARY_SYSTEM`    | 🏗️ Artificial | 3          | 5     | Expansión combinada   | Muy raro     |
+| `WORM_HOLE`           | 🏗️ Artificial | 0          | 5     | Movimiento especial   | Extremo raro |
+
+**Niveles de rareza:**  
+- Común  
+- Poco común  
+- Raro  
+- Muy raro  
+- Extremadamente raro
 
 
 ## 🧩 Relaciones entre Entidades
 
+### 📊 Diagrama de Entidades y Relaciones
 ```mermaid 
 flowchart LR
     Game --> Epoch
@@ -146,6 +188,7 @@ flowchart LR
     Game --> Memories
 ```
 
+### ⏳ Proceso de Iteración de Época (Tick)
 ```mermaid 
 sequenceDiagram
 Title: Iteracion de Época (Tick)
@@ -162,6 +205,7 @@ Title: Iteracion de Época (Tick)
   Memories->>Game: actualizar estadísticas
 ```
 
+### 🤼 Proceso de Resolucion de Skirmish
 ```mermaid 
 sequenceDiagram
 Title: Resolucion de un Skirmish
@@ -176,25 +220,41 @@ Title: Resolucion de un Skirmish
 ```
 
 
-
 ## 📊 Matriz de Resolución de Skirmishes
 
-| Civ A ↓ / Civ B → | **COOPERATE** | **ATTACK** | **NOTHING** |
-|-------------------|---------------|------------|-------------|
-| **COOPERATE**     | A: 50% - B: 50%<br/>*Ambos controlan*<br/>*Status: CONTROLLED* | A: 0% - B: 83%<br/>*Solo B controla*<br/>*Status: CONTROLLED* | A: 67% - B: 17%<br/>*Ambos controlan*<br/>*Status: CONTROLLED* |
-| **ATTACK**        | A: 83% - B: 0%<br/>*Solo A controla*<br/>*Status: CONTROLLED* | A: 17% - B: 17%<br/>*Ambos controlan*<br/>*Status: CONTROLLED* | A: 83% - B: 0%<br/>*Solo A controla*<br/>*Status: CONTROLLED* |
-| **NOTHING**       | A: 17% - B: 67%<br/>*Ambos controlan*<br/>*Status: CONTROLLED* | A: 0% - B: 83%<br/>*Solo B controla*<br/>*Status: CONTROLLED* | A: 0% - B: 0%<br/>*Nadie controla*<br/>*Status: DISPUTED → LOST* |
+| Civ A ↓ / Civ B → | 🤝 **COOPERATE** | ⚔️ **ATTACK** | 🤡 **NOTHING** |
+|-------------------|------------------|---------------|----------------|
+| 🤝 **COOPERATE**     | 🟡 A: 3/6 - 50% <br/>🟡 B: 3/6 - 50% | 🔴 A: 0/6 - 0% <br/>🟢 B: 5/6 - 83% | 🟢 A: 5/6 - 83% <br/>🔴 B: 0/6 - 0% |
+| ⚔️ **ATTACK**        | 🟢 A: 5/6 - 83% <br/>🔴 B: 0/6 - 0% | 🟠 A: 1/6 - 17% <br/>🟠 B: 1/6 - 17%  | 🟡 A: 4/6 - 66% <br/>🔴 B: 0/6 - 0% |
+| 🤡 **NOTHING**       | 🔴 A: 0/6 - 0% <br/>🟢 B: 5/6 - 83% |  🔴 A: 0/6 - 0% <br/>🟡 B: 4/6 - 66% | 🔴 A: 0/6 - 0% <br/>🔴 B: 0/6 - 0% |
 
-### 📈 Interpretación de la Matriz:
-- **Cooperación mutua**: Máximo beneficio conjunto (50%-50%)
-- **Conflicto mutuo**: Mínimo beneficio, máximo desperdicio (17%-17%)
-- **Traición**: El agresor gana más (83% vs 0%)
-- **Inacción total**: AstronomyBody se marca como DISPUTED, si se repite → LOST permanentemente
+### 📈 Analisis de eficiencia de aprovechamiento de recursos
+- 🔵 **Cooperación mutua**: Máximo aprovechamiento conjunto (50%-50%)
+- 🟢 **Traición**: El agresor logra mayor aprovechamiento (83% vs 0%)
+- 🟢 **Asimilacion**: Aprovechamiento alto sin agresion (83% vs 0%)
+- 🟡 **Masacre**: Aprovechamiento moderado, pero desperdicio (66%-0%)
+- 🟠 **Conflicto mutuo**: Mínimo aprovechamiento, máximo desperdicio (17%-17%)
+- 🔴 **Perdida total**: AstronomyBody se marca como `DISPUTED`, si se repite → `LOST` permanentemente
 
 ### 🎯 Rangos de AstronomyBodies:
 - **Asteroid**: Costo 1, Producción 1 *(abundante, bajo riesgo)*
 - **Moon**: Costo 2, Producción 2 *(equilibrado)*
 - **Planet**: Costo 3, Producción 3 *(alto valor, alto riesgo)*
+
+### **Example: Distribución de Recursos**
+```
+🌙 Luna (base_production: 3)
+   ├─ Skirmish: Civ_A(COOPERATE) vs Civ_B(COOPERATE)
+   ├─ Matriz: A=50% | B=50% 
+   ├─ Distribución: A=1.5 | B=1.5
+   └─ Resultado: Ambas reciben 1.5 recursos → A+2, B+2 (redondeado)
+
+🪨 Asteroid (base_production: 1)  
+   ├─ Skirmish: Civ_A(ATTACK) vs Civ_B(COOPERATE)
+   ├─ Matriz: A=83% | B=0%
+   ├─ Distribución: A=0.83 | B=0
+   └─ Resultado: Solo A recibe 1 recurso
+```
 
 ---
 
