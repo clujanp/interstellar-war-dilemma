@@ -7,6 +7,7 @@ Conceptos del dominio para el juego, el core se basa en la toma de decisiones es
 ### 🏛️ Entidades Principales
 
 #### 🏴‍☠️ **Civilization** (Entidad Central)
+Mantiene logica de desición y recursos y expone estado.
   - **Estado**: `ACTIVE` -> (`DECLINING`, `DEAD`)
   - **Recursos**: `Resources` (Valor)
   1. Mantener recursos actuales
@@ -15,18 +16,24 @@ Conceptos del dominio para el juego, el core se basa en la toma de decisiones es
   4. Ejecutar estrategia de decisión (Area de acción del jugador)
 
 #### 🪐 **AstronomyBody** (Entity)
+No gestiona procesos, solo expone estado y atributos.
   - **Estado**: `AVAILABLE` -> (`DISPUTED`, `LOST`)
   - **Costo de Colonización**: `ResourceEnum` (0-5)
   - **Produccion**: `ResourceEnum` (0-3)
   1. Ser el objetivo de disputa
+  2. Gestionar reintentos de disputa
 
 #### 💰 **ResourceProduction** (Entity)
+Sin logica compleja, solo calcula y expone generacion de recursos.
   - **Civilizacion**: `Civilization`
   - **AstronomyBody**: `AstronomyBody`
   - **Participación**: `Participation` (FloatEnum)
   1. Resolver producción de recursos según participación
+  2. Definir reglas de redondeo
+  3. Controlar participación máxima (<=100%)
 
 #### ⚔️ **Skirmish** (Entity)
+Centraliza la lógica y datos de resolución y vincula las entidades relacionadas.
   - **Estados**: `CREATED` → `EXECUTED` → `RESOLVED`
   - **Civilizacion A**: `Civilization`
   - **Civilizacion B**: `Civilization`
@@ -39,14 +46,18 @@ Conceptos del dominio para el juego, el core se basa en la toma de decisiones es
   1. Cobrar costos de colonizacion
   2. Resolver resultado según matriz
   3. Definir porcentajes de produccion de recursos
+  4. Validar si ambas civilizaciones pueden pagar
 
 #### 🕰️ **Epoch** (Entity)
+Gestiona agrupacion de skirmishes con sobre escrituras generada en el juego.
   - **Estado**: `FUTURE` -> `CURRENT` -> `HISTORIC`
   - **Skirmishes**: Lista de `Skirmish`
-  1. Generar AstronomyBodies aleatorios
-  2. Agrupar todos los skirmishes de una ronda
+  1. Agrupar todos los skirmishes de una ronda
+  2. Finalizar época y actualizar estados
+  3. Llevar indice creciente de épocas
 
 #### 🧠 **Memories** (Entity)
+Almacena el historial completo de skirmishes, asi como permite consultas para analisis avanzado, lecturas en batch y eficientes.
   - **Epocas**: Lista de `Epoch`
   - **Propietario**: `Civilization`
   1. Registrar epocas de skirmishes filtrando por propietario
@@ -54,12 +65,14 @@ Conceptos del dominio para el juego, el core se basa en la toma de decisiones es
   3. Permitir consultas avanzadas
 
 #### 🎮 **Game** (Aggregate Root)
+Centraliza la coordinación, mecanicas especiales y reglas globales, delega detalles a entidades.
   - **Civilizaciones**: Lista de `Civilization`
   - **Memorias**: Lista de `Memories`
   1. Orquestar épocas secuenciales
   2. Mantener estadísticas globales
   3. Controlar estados de muerte
   4. Asegurar participación de todas las civilizaciones
+  5. Gestionar eventos globales para suscitar dinamicas especiales de mecánicas
 
 ## 🔄 Objetos de Valor
 
@@ -256,7 +269,6 @@ Title: Resolucion de un Skirmish
    └─ Resultado: Solo A recibe 1 recurso
 ```
 
----
 
 ## 🎯 Flujo de Procesos
 
@@ -265,8 +277,8 @@ Title: Resolucion de un Skirmish
 flowchart LR
     A((Skirmish a resolver)) --> B{¿Ambas civs pueden pagar?}
     B -->|No| C[Cancelar Skirmish] --> J
-    B -->|Sí| 
-    subgraph Proceso Skirmish [Ejecutar Skirmish]
+    B -->|Sí| ProcesoSkirmish
+    subgraph ProcesoSkirmish [Ejecutar Skirmish]
       direction TB
       D[Cobrar costos de colonización]
       D --> E[Solicitar decisiones a estrategias]
@@ -274,12 +286,12 @@ flowchart LR
       F --> G[Calcular producción con eficiencia]
       G --> I[Registrar en memorias]
     end
-    I --> J((Finalizar Skirmish))
+    ProcesoSkirmish --> J((Finalizar Skirmish))
 ```
 
 ### **Proceso: Ejecutar Época**
 ```mermaid
-graph TD
+graph LR
     A[Iniciar Época N] --> B[Crear Skirmishes aleatorios]
     B --> C{¿Hay skirmishes válidos?}
     C -->|No| D[Finalizar época sin cambios]
@@ -289,7 +301,6 @@ graph TD
     G --> H[Actualizar estadísticas]
 ```
 
----
 
 ## 🧠 Sistema de Memoria Global
 
@@ -328,7 +339,6 @@ graph TD
 - `recommendAction(body, opponent, current_resources)`: Sugerencia basada en análisis completo
 - `getDeathWatch()`: Lista de civilizaciones en riesgo de muerte (próximas 2 épocas)
 
----
 
 ## 🎮 Interfaces de Estrategia
 
@@ -362,7 +372,6 @@ def decide(
 9. **ProfitMaximizer**: Siempre busca máximo retorno de inversión
 10. **Survivor**: Prioriza supervivencia sobre ganancias
 
----
 
 ## 🔮 Extensiones Futuras
 
@@ -395,7 +404,6 @@ def decide(
 - **Asteroid**: Bajo costo, baja producción, abundante
 - **Space Station**: Costo premium, producción eficiente, tecnológico
 
----
 
 ## 🚀 Mecánicas Futuras - Brainstorming
 
@@ -436,7 +444,6 @@ def decide(
 - **Upgrades**: Tecnologías que expanden capacidad
 - **Memoria Especializada**: Tipos específicos de memoria (combate, recursos, diplomacia)
 
----
 
 ## 🎲 Mecánicas de Aleatoriedad
 
@@ -456,7 +463,6 @@ def decide(
 - Astronomy bodies que aparecen/desaparecen
 - Modificadores temporales de eficiencia
 
----
 
 ## 📊 Métricas y Análisis
 
