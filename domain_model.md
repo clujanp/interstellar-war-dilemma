@@ -188,49 +188,64 @@ Consideracion del resultado de un skirmish entre dos civilizaciones.
 ## 🧩 Relaciones entre Entidades
 
 ### 📊 Diagrama de Entidades y Relaciones
-```mermaid 
+```mermaid
 flowchart LR
-    Game --> Epoch
-    Game --> Civilization
-    subgraph SkirmishGroup [Skirmishes]
-        Civilization --Position--> Skirmish --> AstronomyBody
-        Skirmish --> Epoch --> Memories --> Civilization
-        AstronomyBody --> ResourceProduction
-        ResourceProduction --Resources--> Civilization
-    end
-    Game --> Memories
-```
+  Game[🎮 Game] --> Epoch[🕰️ Epoch]
+  Game --> Civ[🏴‍☠️ Civilization]
+  subgraph SkirmishGroup [⚔️ Skirmishes]
+    Civ --Position--> Skirmish[⚔️ Skirmish] --> Astro[🪐 AstronomyBody]
+    Skirmish --> Epoch --> Mem[🧠 Memories] --> Civ
+    Astro --> RP[💰 ResourceProduction]
+    RP --Resources--> Civ
+  end
+  Game --> Mem
+``` 
 
 ### ⏳ Proceso de Iteración de Época (Tick)
-```mermaid 
+```mermaid
 sequenceDiagram
-Title: Iteracion de Época (Tick)
+  participant Game as 🎮 Game
+  participant Epoch as 🕰️ Epoch
+  participant Memories as 🧠 Memories
+  participant Prod as 💰 Production
+  participant Civs as 🏴‍☠️ Civilizations
+  participant AstroBody as 🪐 AstronomyBody
+  participant Skirmishes as ⚔️ Skirmishes
+
+  Title: ⏳ Iteración de Época (Tick)
   Game->>Epoch: Iniciar nueva época
-  Epoch->>Memories: Registrar en Memories
-  Epoch->>Prod: 
+  Epoch->>Memories: Registrar en memorias
+  Epoch->>Prod: Calcular producción
   Prod->>Civs: Abonar recursos
-  Epoch->>AstroBody: Generar AstronomyBodies aleatorios
+  Epoch->>AstroBody: Generar astronomy bodies
   Epoch->>Skirmishes: Crear skirmishes
   Skirmishes->>Skirmishes: Resolver skirmishes
-  Skirmishes->>Epoch: 
-  Epoch->>Memories: Cerrar Epoch en Memories
+  Skirmishes->>Epoch: Marcar skirmish como resuelto
+  Epoch->>Memories: Cerrar época en memorias
   Epoch->>Game: Finalizar época
-  Memories->>Game: actualizar estadísticas
-```
+  Memories->>Game: Actualizar estadísticas
+``` 
 
 ### 🤼 Proceso de Resolucion de Skirmish
-```mermaid 
+```mermaid
 sequenceDiagram
-Title: Resolucion de un Skirmish
+  participant Skirmish as ⚔️ Skirmish
+  participant AstroBody as 🪐 AstronomyBody
+  participant CivA as 🏴‍☠️ CivA
+  participant CivB as 🏴‍☠️ CivB
+  participant Memories as 🧠 Memories
+  participant Epoch as 🕰️ Epoch
+
+  Title: 🤼 Resolución de un Skirmish
   Skirmish->>AstroBody: Consultar costo y producción
   Skirmish->>CivA: Cobrar costo de colonización
   Skirmish->>CivB: Cobrar costo de colonización
-  Memories->>CivA: Proporcionar Analisis histórico Oponente
+  Memories->>CivA: Proporcionar análisis histórico
   Skirmish->>CivA: Solicitar decisión (COO/ATK)
   Skirmish->>CivB: Solicitar decisión (COO/ATK)
   Skirmish->>Skirmish: Registrar resultado
   Skirmish->>Epoch: Marcar skirmish como resuelto
-```
+``` 
 
 
 ## 📊 Matriz de Resolución de Skirmishes
@@ -275,31 +290,30 @@ Title: Resolucion de un Skirmish
 ### **Proceso: Ejecutar Skirmish**
 ```mermaid
 flowchart LR
-    A((Skirmish a resolver)) --> B{¿Ambas civs pueden pagar?}
-    B -->|No| C[Cancelar Skirmish] --> J
-    B -->|Sí| ProcesoSkirmish
-    subgraph ProcesoSkirmish [Ejecutar Skirmish]
+    A((⚔️ Skirmish a resolver)) --> B{💰 ¿Ambas civs pueden pagar?}
+    B -->|No| C[❌ Cancelar Skirmish] --> J
+    B -->|Sí| D[💰 Cobrar costos de colonización]
+    subgraph ProcesoSkirmish [⚔️ Ejecutar Skirmish]
       direction TB
-      D[Cobrar costos de colonización]
-      D --> E[Solicitar decisiones a estrategias]
-      E --> F[Aplicar matriz de resolución]
-      F --> G[Calcular producción con eficiencia]
-      G --> I[Registrar en memorias]
+      D --> E[🎯 Solicitar decisiones a estrategias]
+      E --> F[📊 Aplicar matriz de resolución]
+      F --> G[⚙️ Calcular producción con eficiencia]
+      G --> I[💾 Registrar en memorias]
     end
-    ProcesoSkirmish --> J((Finalizar Skirmish))
-```
+    I --> J((🏁 Finalizar Skirmish))
+``` 
 
 ### **Proceso: Ejecutar Época**
 ```mermaid
 graph LR
-    A[Iniciar Época N] --> B[Crear Skirmishes aleatorios]
-    B --> C{¿Hay skirmishes válidos?}
-    C -->|No| D[Finalizar época sin cambios]
-    C -->|Sí| E[Ejecutar cada skirmish]
-    E --> F[Recopilar resultados]
-    F --> G[Avanzar a Época N+1]
-    G --> H[Actualizar estadísticas]
-```
+  A[🕰️ Iniciar Época N] --> B[🔀 Crear Skirmishes aleatorios]
+  B --> C{⚠️ ¿Hay skirmishes válidos?}
+  C -->|No| D[🏁 Finalizar época sin cambios]
+  C -->|Sí| E[⚔️ Ejecutar cada skirmish]
+  E --> F[📊 Recopilar resultados]
+  F --> G[⏭️ Avanzar a Época N+1]
+  G --> H[📈 Actualizar estadísticas]
+``` 
 
 
 ## 🧠 Sistema de Memoria Global
