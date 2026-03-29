@@ -1,0 +1,155 @@
+from pydantic import (
+    BaseModel as PyDanticBaseModel,
+    Field,
+    model_validator,
+    ConfigDict,
+    PrivateAttr,
+)
+from random import choice as random_choice
+from .value_objects import (
+    AstronomicObjectType, Resources, Decision, Resolution)
+from .exceptions import SkirmishResolvedExcept
+
+
+class BaseModel(PyDanticBaseModel):
+    """Base model for all domain models."""
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
+
+
+class Galaxy(BaseModel):
+    """Group of star systems"""
+    name: str
+    type: str
+    star_systems: list['StartSystem']
+    
+    
+class StartSystem(BaseModel):
+    """Group of astronomical objects orbiting a star"""
+    name: str
+    astronomical_objects: list['AstronomyBody']
+
+
+class AstronomyBody(BaseModel):
+    """Represents an astronomical object that disputes for resources"""
+    name: str = Field(default_factory=lambda: AstronomyBody.generate_name())
+    type: AstronomicObjectType
+    resources: Resources
+    owner: list['Civilization'] | None = None
+        
+    @staticmethod
+    def generate_name() -> str:
+        """Generate a random name for the astronomy body."""
+        prefixes = [
+            'Zor', 'Xan', 'Vel', 'Kry', 'Syn', 'Trant', 'Swi', 'Termin',
+            'Nebul', 'Quar', 'Vort', 'Lun', 'Stell', 'Cosm', 'Galax', 'Orion',
+        ]
+        suffixes = [
+            'on', 'or', 'ar', 'is', 'us', 'ia', 'or', 'ax', 'ena', 'ion',
+            'ara', 'ix', 'a', 'e', 'i', 'o', 'u',
+        ]
+        return random_choice(prefixes) + random_choice(suffixes)
+    
+    
+class Civilization(BaseModel):
+    """Represents a civilization that competes for resources"""
+    name: str
+    home_planet: AstronomyBody
+    resources: Resources = Resources.NONE
+    
+    
+# Gameplay models
+class Round(BaseModel):
+    """Represents a round of the game"""
+    number: int
+    skirmishes: list['Skirmish']
+
+
+class Skirmish(BaseModel):
+    """Represents a skirmish between two civilizations over an astro object"""
+    civ_a: Civilization
+    civ_b: Civilization
+    astronomical_object: AstronomyBody
+    resolution: Resolution = Resolution.NOT_RESOLVED
+    decision_a: Decision | None = None
+    decision_b: Decision | None = None
+    civ_a_resources_gained: Resources = Resources.NONE
+    civ_b_resources_gained: Resources = Resources.NONE
+    _frozen: bool = PrivateAttr(default=False)
+
+    def model_post_init(self, __context) -> None:
+        # Keep skirmish immutable when loaded in a resolved state.
+        self._frozen = bool(self.resolution)
+
+    def __setattr__(self, name, value):
+        if name in self.model_fields and self._frozen:
+            raise SkirmishResolvedExcept("Skirmish is frozen after resolution.")
+        super().__setattr__(name, value)
+    
+    @model_validator(mode='after')
+    def validate_not_same_civilization(cls, skirmish) -> 'Skirmish':
+        """Validates that both civilizations in the skirmish are different."""
+        if skirmish.civ_a == skirmish.civ_b:
+            raise ValueError(
+                "Both civilizations in a skirmish must be different.")
+        return skirmish
+
+    def resolve(self):
+        if not self.decision_a or not self.decision_b:
+            raise SkirmishResolvedExcept(
+                "Both civilizations must make a decision before resolving "
+                "the skirmish."
+            )
+        if self.resolution:
+            raise SkirmishResolvedExcept("Skirmish has already been resolved.")
+
+        self._resolve_skirmish()
+        self._calculate_gains()
+        self._assign_owner_to_astronomical_object()
+        self._frozen = True
+        
+    @property
+    def is_resolved(self) -> bool:
+        """Returns True if the skirmish has been resolved, False otherwise."""
+        return bool(self.resolution)
+        
+    def _resolve_skirmish(self) -> None:
+        """Resolves a skirmish based on the decisions of both civilizations."""
+        match (self.decision_a, self.decision_b):
+            case (Decision.COOPERATE, Decision.COOPERATE):
+                self.resolution = Resolution.COOPERATION
+            case (Decision.DEFECT, Decision.COOPERATE):
+                self.resolution = Resolution.BETRAYAL_A
+            case (Decision.COOPERATE, Decision.DEFECT):
+                self.resolution = Resolution.BETRAYAL_B
+            case (Decision.DEFECT, Decision.DEFECT):
+                self.resolution = Resolution.CONFLICT
+            case (Decision.NOT_DECIDED, Decision.NOT_DECIDED):
+                self.resolution = Resolution.NOT_RESPONDED
+            case (Decision.NOT_DECIDED, Decision.COOPERATE):
+                self.resolution = Resolution.NOT_COOPERATE_A
+            case (Decision.COOPERATE, Decision.NOT_DECIDED):
+                self.resolution = Resolution.NOT_COOPERATE_B
+            case (Decision.NOT_DECIDED, Decision.DEFECT):
+                self.resolution = Resolution.MASSACRE_A
+            case (Decision.DEFECT, Decision.NOT_DECIDED):
+                self.resolution = Resolution.MASSACRE_B
+        
+    def _calculate_gains(self) -> None:
+        """Calculates the resources gained by each civilization based on the
+        resolution of the skirmish."""
+        self.civ_a_resources_gained = Resources(
+            self.astronomical_object.resources * self.resolution.value[0])
+        self.civ_b_resources_gained = Resources(
+            self.astronomical_object.resources * self.resolution.value[1])
+        
+    def _assign_owner_to_astronomical_object(self) -> None:
+        """Assigns the owner of the astronomical object based on the resources
+        gained by each civilization."""
+        if self.civ_a_resources_gained > self.civ_b_resources_gained:
+            self.astronomical_object.owner = [self.civ_a]
+        elif self.civ_b_resources_gained > self.civ_a_resources_gained:
+            self.astronomical_object.owner = [self.civ_b]
+        else:
+            self.astronomical_object.owner = [self.civ_a, self.civ_b]
