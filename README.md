@@ -14,13 +14,14 @@ Decisions are made using available match information and historical context quer
 | Civilization A | Civilization B | Resolution        |
 |----------------|----------------|-------------------|
 | 👍 3           | 👍 3           | 🤝 Cooperation    |
-| 👍 0           | 🖕 5           | 🗿 Betrayal       |
-| 🖕 5           | 👍 0           | 🗿 Betrayal       |
+| 🖕 5           | 👍 0           | 🗿 Betrayal_A     |
+| 👍 0           | 🖕 5           | 🗿 Betrayal_B     |
 | 🖕 1           | 🖕 1           | ⚔️ Conflict       |
-| ⛔️ 2           | ⛔️ 2           | ⛔️ No Response    |
-| ⛔️ 2           | 👍 2           | ⛔️ No Response    |
-| 👍 2           | ⛔️ 2           | ⛔️ No Response    |
-| 🖕 2           | ⛔️ 0           | 🩸 Massacre       |
+| ⛔️ 1           | ⛔️ 1           | 🚫 No Response    |
+| ⛔️ 1           | 👍 2           | ❌ No Cooperate_A |
+| 👍 2           | ⛔️ 1           | ❌ No Cooperate_B |
+| ⛔️ 0           | 🖕 5           | 🩸 Massacre_A     |
+| 🖕 5           | ⛔️ 0           | 🩸 Massacre_B     |
 
 Scores in each cell are represented as `Action Score` for each civilization.
 
