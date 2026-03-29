@@ -11,9 +11,9 @@ class TestSkirmish(TestCase):
         self.siwenna = AstronomyBody(
             name="Siwenna", type=AstroType.PLANET, resources=Resources(10))
         self.fundation = Civilization(
-            name="Foundation", home_planet=self.siwenna)
+            name="Foundation", home_astro_body=self.siwenna)
         self.empire = Civilization(
-            name="Empire", home_planet=self.siwenna)
+            name="Empire", home_astro_body=self.siwenna)
         self.skirmish = Skirmish(
             civ_a=self.fundation,
             civ_b=self.empire,

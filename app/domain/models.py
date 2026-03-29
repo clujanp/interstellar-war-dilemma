@@ -55,7 +55,7 @@ class AstronomyBody(BaseModel):
 class Civilization(BaseModel):
     """Represents a civilization that competes for resources"""
     name: str
-    home_planet: AstronomyBody
+    home_astro_body: AstronomyBody
     resources: Resources = Resources.NONE
     
     

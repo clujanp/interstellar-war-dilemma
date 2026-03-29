@@ -13,10 +13,10 @@ class TestMemories(TestCase):
         """Initialize test fixtures with civilizations and memories instance."""
         self.home = AstronomyBody(
             name="Siwenna", type=AstroType.PLANET, resources=Resources(12))
-        self.owner = Civilization(name="Foundation", home_planet=self.home)
-        self.opponent = Civilization(name="Empire", home_planet=self.home)
-        self.other = Civilization(name="Alliance", home_planet=self.home)
-        self.other_2 = Civilization(name="Guild", home_planet=self.home)
+        self.owner = Civilization(name="Foundation", home_astro_body=self.home)
+        self.opponent = Civilization(name="Empire", home_astro_body=self.home)
+        self.other = Civilization(name="Alliance", home_astro_body=self.home)
+        self.other_2 = Civilization(name="Guild", home_astro_body=self.home)
         self.memories = Memories(owner=self.owner)
 
     def _resolved_skirmish(
