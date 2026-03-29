@@ -1,42 +1,102 @@
-# python-template
-Template for Python repos
+# Interstellar War Dilemma
+A turn-based strategy simulation inspired by the Prisoner's Dilemma.
 
-## Config repository
-### set repository variables
-  - PYTHON_VERSION
-  - SRC_FOLDER
-  - TESTS_FOLDER
-  - COV_PERCENT
-  - PYLINT_SCORE
-  - REQUIREMENTS_DEV
-  - REQUIREMENTS_PROD
-  - STAGING_TF_BACKEND_AWS_REGION
-  - STAGING_TF_STATE_BUCKET
-  - STAGING_TF_STATE_KEY
-  - PRODUCTION_TF_BACKEND_AWS_REGION
-  - PRODUCTION_TF_STATE_BUCKET
-  - PRODUCTION_TF_STATE_KEY
+In the current core version, each player controls a civilization and only decides one action per skirmish:
 
-### available pre-build
-  - GitHub Actions: CI for commits, pre-CD for PRs, CD for merges
-  - .vscode settings: IDE status bar color
-  - App structure: Hexagonal architectur:
-    - Adapters
-    - Core
-    - Domain
-    - Models
-    - Services
-    - Use cases
-    - Infrastructure
-    - logging
-    - Utils
-  - Config: for requirements and environment variables
-  - Docker: for local development
-  - Terraform: for staging and production environments
-  - Tests: for unit and integration tests
-  - Linting: for code quality qith pylint
-  - Coverage: for code coverage with pytest-cov
-  - CURP: Common Utilities for Python Repos script
+- `👍` Cooperate
+- `🖕` Aggress
+- `⛔️` No Response (timeout or unavailable player)
 
-> [!NOTE]
-> Enjoi it!
+Decisions are made using available match information and historical context queried through the `Memories` service.
+
+## Decision Matrix
+
+| Civilization A | Civilization B | Resolution        |
+|----------------|----------------|-------------------|
+| 👍 3           | 👍 3           | 🤝 Cooperation    |
+| 👍 0           | 🖕 5           | 🗿 Betrayal       |
+| 🖕 5           | 👍 0           | 🗿 Betrayal       |
+| 🖕 1           | 🖕 1           | ⚔️ Conflict       |
+| ⛔️ 2           | ⛔️ 2           | ⛔️ No Response    |
+| ⛔️ 2           | 👍 2           | ⛔️ No Response    |
+| 👍 2           | ⛔️ 2           | ⛔️ No Response    |
+| 🖕 2           | ⛔️ 0           | 🩸 Massacre       |
+
+Scores in each cell are represented as `Action Score` for each civilization.
+
+## Core Gameplay (MVP)
+
+This project is intentionally focused on the simulation core. A player does not control movement, economy, or territory in this stage. The player role is to choose a strategy per skirmish.
+
+Round flow:
+
+```mermaid
+flowchart LR
+	A[🛠️ Round Setup] --> B[🧠 Information Phase]
+	B --> C[🎯 Decision Phase
+            👍 or 🖕]
+	C --> D[⚖️ Resolution Phase]
+	D --> E[🗂️ History Update
+            in Memories]
+	E --> F{🔁 Next Round?}
+	F -- Yes --> A
+	F -- No --> G[🏁 End Match]
+```
+
+```mermaid
+sequenceDiagram
+	participant E as Engine
+	participant P as Player (Civ A or Civ B)
+	participant M as Memories Service
+
+	E->>P: Start Round + context snapshot
+
+	P->>M: Query historical interactions
+	M-->>P: Historical context
+
+	P-->>E: Action (Cooperate/Aggress/No Response)
+
+	E->>E: Resolve Decision Matrix + score update
+	E->>M: Persist round result
+	M-->>E: Confirmation
+
+	E-->>P: Round result + updated score
+```
+
+1. **Round Setup**: The engine creates pairings and provides the information snapshot.
+2. **Information Phase**: Each player reviews available context, including `Memories` query results.
+3. **Decision Phase**: Each player selects `Cooperate`, `Aggress`, or gets `No Response`.
+4. **Resolution Phase**: The engine applies the Decision Matrix and assigns scores.
+5. **History Update**: The result is stored in historical records for future decisions.
+
+## Technical Specification
+
+The technical functional contract for implementing the engine is documented in [doc/rules-spec.md](doc/rules-spec.md).
+
+## Victory Condition
+
+The victory condition is intentionally open in the current core version.
+
+This allows running different simulation objectives without changing the decision engine (for example: fixed rounds, score threshold, or custom tournament rules).
+
+## Space for Expansion
+
+Possible future expansions include:
+- richer galaxy hierarchy and territorial layers,
+- advanced resource and movement systems,
+- additional strategy presets and tournament formats.
+
+## Future Direction (Not in MVP)
+
+The core simulation is designed to scale later into a platform model with:
+- REST API orchestration,
+- WebHook callbacks for player decisions,
+- player-hosted servers distributed as Docker images.
+
+For now, this repository focuses only on the decision simulation core.
+
+## Out of Scope (Current Core)
+
+- Cybersecurity attack/defense gameplay.
+- Player authentication server implementation.
+- Full infrastructure orchestration for external server integration.
