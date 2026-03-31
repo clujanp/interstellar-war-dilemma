@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from app.domain.exceptions import MemoriesValidationExcept
 from app.domain.models import AstronomyBody, Civilization, Skirmish
-from app.domain.services import Memories
+from app.domain.services.memories import Memories
 from app.domain.value_objects import AstronomicObjectType as AstroType
 from app.domain.value_objects import Decision, Resources
 
