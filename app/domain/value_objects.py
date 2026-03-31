@@ -42,3 +42,11 @@ class AstronomicObjectType(StrEnum):
     MOON = "moon"
     ASTEROID = "asteroid"
     ARTIFICIAL = "artificial"
+
+
+class MatchStatus(StrEnum):
+    """Represents the status of a match simulation"""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    STOPPED = "stopped"

@@ -8,8 +8,8 @@ from pydantic import (
 )
 from random import choice as random_choice
 from .value_objects import (
-    AstronomicObjectType, Resources, Decision, Resolution)
-from .exceptions import SkirmishResolvedExcept
+    AstronomicObjectType, MatchStatus, Resources, Decision, Resolution)
+from .exceptions import MatchValidationExcept, SkirmishResolvedExcept
 
 
 class BaseModel(PyDanticBaseModel):
@@ -63,6 +63,52 @@ class Civilization(BaseModel):
     
     
 # Gameplay models
+class Match(BaseModel):
+    """Aggregate root: represents a match simulation with n rounds."""
+    status: MatchStatus = MatchStatus.PENDING
+    target_rounds: int
+    current_round: int = 0
+    civilizations: list[Civilization] = Field(default_factory=list)
+    cumulative_scores: dict[str, Resources] = Field(default_factory=dict)
+
+    @property
+    def can_start_round(self) -> bool:
+        """Returns if a new round can be started."""
+        return (
+            self.status == MatchStatus.RUNNING
+            and self.current_round < self.target_rounds
+        )
+
+    def start(self) -> None:
+        """Transition from PENDING to RUNNING."""
+        if self.status != MatchStatus.PENDING:
+            raise MatchValidationExcept(
+                "Match can only be started from PENDING status.")
+        self.status = MatchStatus.RUNNING
+
+    def advance_round(self) -> None:
+        """Advance to the next round."""
+        if not self.can_start_round:
+            raise MatchValidationExcept(
+                "Cannot advance round: match is not running "
+                "or target rounds reached.")
+        self.current_round += 1
+
+    def mark_completed(self) -> None:
+        """Transition from RUNNING to COMPLETED."""
+        if self.status != MatchStatus.RUNNING:
+            raise MatchValidationExcept(
+                "Match can only be completed from RUNNING status.")
+        self.status = MatchStatus.COMPLETED
+
+    def mark_stopped(self) -> None:
+        """Transition from RUNNING to STOPPED."""
+        if self.status != MatchStatus.RUNNING:
+            raise MatchValidationExcept(
+                "Match can only be stopped from RUNNING status.")
+        self.status = MatchStatus.STOPPED
+
+
 class Round(BaseModel):
     """Represents a round of the game"""
     number: int
