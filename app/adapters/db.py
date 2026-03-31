@@ -1,4 +1,4 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from app.domain.models import Match, Round, Skirmish
 from app.interfaces.db import (
@@ -15,8 +15,6 @@ class InMemoryMatchRepository(MatchRepository):
         self._store: dict[UUID, Match] = {}
 
     def save(self, match: Match) -> UUID:
-        if match.id is None:
-            match.id = uuid4()
         self._store[match.id] = match
         return match.id
 

@@ -1,4 +1,5 @@
 from uuid import UUID
+from uuid import UUID, uuid4
 from pydantic import (
     BaseModel as PyDanticBaseModel,
     Field,
@@ -14,8 +15,8 @@ from .exceptions import MatchValidationExcept, SkirmishResolvedExcept
 
 class BaseModel(PyDanticBaseModel):
     """Base model for all domain models."""
-    id: UUID | None = None
-    
+    id: UUID = Field(default_factory=uuid4)
+
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
     )
