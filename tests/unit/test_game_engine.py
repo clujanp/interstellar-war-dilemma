@@ -43,9 +43,8 @@ class TestGameEngine(TestCase):
         """Verify start_match creates a RUNNING match with registered players."""
         self.engine.register_player(self.civ_1)
         self.engine.register_player(self.civ_2)
-        match_id = self.engine.start_match(target_rounds=3)
+        match = self.engine.start_match(target_rounds=3)
 
-        match = self.match_repo.get(match_id)
         assert match.status == MatchStatus.RUNNING
         assert len(match.civilizations) == 2
         assert match.target_rounds == 3
@@ -54,14 +53,14 @@ class TestGameEngine(TestCase):
         """Verify a round executes with explicit decisions."""
         self.engine.register_player(self.civ_1)
         self.engine.register_player(self.civ_2)
-        match_id = self.engine.start_match(target_rounds=3)
+        match = self.engine.start_match(target_rounds=3)
 
-        self.engine.run_round(match_id, [self.body], decisions={
-            self.civ_1.id: Decision.COOPERATE,
-            self.civ_2.id: Decision.DEFECT,
+        self.engine.run_round(match, [self.body], decisions={
+            self.civ_1: Decision.COOPERATE,
+            self.civ_2: Decision.DEFECT,
         })
 
-        rounds = self.round_repo.get_by_match(match_id)
+        rounds = self.round_repo.get_by_match(match.id)
         assert len(rounds) == 1
         assert rounds[0].skirmishes[0].is_resolved
 
@@ -69,25 +68,25 @@ class TestGameEngine(TestCase):
         """Verify a round uses NOT_DECIDED fallback when no decisions given."""
         self.engine.register_player(self.civ_1)
         self.engine.register_player(self.civ_2)
-        match_id = self.engine.start_match(target_rounds=1)
+        match = self.engine.start_match(target_rounds=1)
 
-        self.engine.run_round(match_id, [self.body])
+        self.engine.run_round(match, [self.body])
 
-        rounds = self.round_repo.get_by_match(match_id)
+        rounds = self.round_repo.get_by_match(match.id)
         assert rounds[0].skirmishes[0].is_resolved
 
     def test_report_results_returns_scores(self):
         """Verify report_results returns cumulative scores."""
         self.engine.register_player(self.civ_1)
         self.engine.register_player(self.civ_2)
-        match_id = self.engine.start_match(target_rounds=1)
+        match = self.engine.start_match(target_rounds=1)
 
-        self.engine.run_round(match_id, [self.body], decisions={
-            self.civ_1.id: Decision.COOPERATE,
-            self.civ_2.id: Decision.COOPERATE,
+        self.engine.run_round(match, [self.body], decisions={
+            self.civ_1: Decision.COOPERATE,
+            self.civ_2: Decision.COOPERATE,
         })
 
-        results = self.engine.report_results(match_id)
+        results = self.engine.report_results(match)
         assert "Foundation" in results
         assert "Empire" in results
         assert results["Foundation"] > Resources.NONE
