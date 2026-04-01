@@ -26,28 +26,33 @@ class InMemoryMatchRepository(MatchRepository):
 
 
 class InMemoryRoundRepository(RoundRepository):
-    """In-memory adapter for Round persistence, keyed by match_id."""
+    """In-memory adapter for Round persistence."""
 
     def __init__(self) -> None:
-        self._store: dict[UUID, list[Round]] = {}
+        self._store: list[Round] = []
 
-    def save(self, match_id: UUID, round: Round) -> None:
-        round.match_id = match_id
-        self._store.setdefault(match_id, []).append(round)
+    def save(self, round: Round) -> None:
+        self._store.append(round)
 
-    def get_by_match(self, match_id: UUID) -> list[Round]:
-        return list(self._store.get(match_id, []))
+    def get(self, round_id: UUID) -> Round:
+        for r in self._store:
+            if r.id == round_id:
+                return r
+        raise KeyError(f"Round '{round_id}' not found.")
 
-    def get(self, match_id: UUID, round_number: int) -> Round:
-        for r in self._store.get(match_id, []):
-            if r.number == round_number:
+    def list_by_match(self, match_id: UUID) -> list[Round]:
+        return [r for r in self._store if r.match.id == match_id]
+
+    def get_by_match(self, match_id: UUID, round_number: int) -> Round:
+        for r in self._store:
+            if r.match.id == match_id and r.number == round_number:
                 return r
         raise KeyError(
             f"Round {round_number} not found for match '{match_id}'.")
 
     def list(self) -> list[Round]:
-        """Return all rounds across all matches, in insertion order."""
-        return [r for rounds in self._store.values() for r in rounds]
+        """Return all rounds in insertion order."""
+        return list(self._store)
 
 
 class InMemorySkirmishQueryRepository(SkirmishQueryRepository):

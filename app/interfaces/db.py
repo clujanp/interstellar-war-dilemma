@@ -20,15 +20,19 @@ class RoundRepository(ABC):
     """Port for Round persistence, scoped by match."""
 
     @abstractmethod
-    def save(self, match_id: UUID, round: Round) -> None:
+    def save(self, round: Round) -> None:
         """Persist a resolved round associated to a match."""
 
     @abstractmethod
-    def get_by_match(self, match_id: UUID) -> list[Round]:
+    def get(self, round_id: UUID) -> Round:
+        """Retrieve a round by its id."""
+
+    @abstractmethod
+    def list_by_match(self, match_id: UUID) -> list[Round]:
         """Retrieve all rounds for a given match."""
 
     @abstractmethod
-    def get(self, match_id: UUID, round_number: int) -> Round:
+    def get_by_match(self, match_id: UUID, round_number: int) -> Round:
         """Retrieve a specific round by match id and round number."""
 
     @abstractmethod
