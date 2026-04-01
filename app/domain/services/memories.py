@@ -1,5 +1,5 @@
-from ..models import Civilization, Skirmish
-from ..exceptions import MemoriesValidationExcept
+from app.domain.models import Civilization, Skirmish
+from app.domain.exceptions import MemoriesValidationExcept
 
 
 class Memories:
