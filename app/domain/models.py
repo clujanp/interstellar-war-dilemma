@@ -195,6 +195,9 @@ class Skirmish(BaseModel):
                 self.resolution = Resolution.MASSACRE_A
             case (Decision.DEFECT, Decision.NOT_DECIDED):
                 self.resolution = Resolution.MASSACRE_B
+            case _:
+                raise SkirmishResolvedExcept(
+                    "Invalid decision combination for skirmish resolution.")
         
     def _calculate_gains(self) -> None:
         """Calculates the resources gained by each civilization based on the
