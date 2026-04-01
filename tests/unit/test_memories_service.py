@@ -1,12 +1,12 @@
 from unittest import TestCase
-from uuid import uuid4
 
 from app.adapters.db import InMemoryRoundRepository, InMemorySkirmishQueryRepository
-from app.domain.models import AstronomyBody, Civilization, Round, Skirmish
+from app.domain.models import AstronomyBody, Civilization, Match, Round, Skirmish
 from app.domain.services.memories_service import MemoriesService
 from app.domain.value_objects import (
     AstronomicObjectType as AstroType,
     Decision,
+    MatchStatus,
     Resources,
 )
 
@@ -22,9 +22,15 @@ class TestMemoriesService(TestCase):
 
         self.body = AstronomyBody(
             name="Alpha", type=AstroType.PLANET, resources=Resources(12))
-        self.civ_1 = Civilization(name="Foundation", home_astro_body=self.body)
-        self.civ_2 = Civilization(name="Empire", home_astro_body=self.body)
-        self.civ_3 = Civilization(name="Alliance", home_astro_body=self.body)
+        self.civ_1 = Civilization(name="Foundation", home=self.body)
+        self.civ_2 = Civilization(name="Empire", home=self.body)
+        self.civ_3 = Civilization(name="Alliance", home=self.body)
+
+        self.match = Match(
+            target_rounds=5,
+            civilizations=[self.civ_1, self.civ_2, self.civ_3],
+            status=MatchStatus.RUNNING,
+        )
 
     def _make_resolved_skirmish(self, civ_a, civ_b):
         """Create a resolved skirmish between two civilizations."""
@@ -47,8 +53,8 @@ class TestMemoriesService(TestCase):
         """Verify skirmishes involving the owner are returned."""
         s1 = self._make_resolved_skirmish(self.civ_1, self.civ_2)
         s2 = self._make_resolved_skirmish(self.civ_2, self.civ_3)
-        match_id = uuid4()
-        self.round_repo.save(match_id, Round(number=1, skirmishes=[s1, s2]))
+        self.round_repo.save(
+            Round(match=self.match, number=1, skirmishes=[s1, s2]))
 
         result = self.service.get_skirmish_history(self.civ_1)
         assert len(result) == 1
@@ -58,8 +64,8 @@ class TestMemoriesService(TestCase):
         """Verify filtering by opponent civilization."""
         s1 = self._make_resolved_skirmish(self.civ_1, self.civ_2)
         s2 = self._make_resolved_skirmish(self.civ_1, self.civ_3)
-        match_id = uuid4()
-        self.round_repo.save(match_id, Round(number=1, skirmishes=[s1, s2]))
+        self.round_repo.save(
+            Round(match=self.match, number=1, skirmishes=[s1, s2]))
 
         result = self.service.get_skirmish_history(self.civ_1, opponent=self.civ_3)
         assert len(result) == 1
@@ -69,9 +75,10 @@ class TestMemoriesService(TestCase):
         """Verify last_n limits the results."""
         s1 = self._make_resolved_skirmish(self.civ_1, self.civ_2)
         s2 = self._make_resolved_skirmish(self.civ_1, self.civ_3)
-        match_id = uuid4()
-        self.round_repo.save(match_id, Round(number=1, skirmishes=[s1]))
-        self.round_repo.save(match_id, Round(number=2, skirmishes=[s2]))
+        self.round_repo.save(
+            Round(match=self.match, number=1, skirmishes=[s1]))
+        self.round_repo.save(
+            Round(match=self.match, number=2, skirmishes=[s2]))
 
         result = self.service.get_skirmish_history(self.civ_1, last_n=1)
         assert len(result) == 1
