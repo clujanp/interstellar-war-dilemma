@@ -1,4 +1,3 @@
-from uuid import UUID
 from uuid import UUID, uuid4
 from pydantic import (
     BaseModel as PyDanticBaseModel,
@@ -67,7 +66,7 @@ class AstronomyBody(BaseModel):
 class Civilization(BaseModel):
     """Represents a civilization that competes for resources"""
     name: str
-    home_astro_body: AstronomyBody
+    home: AstronomyBody
     resources: Resources = Resources.NONE
     
     
@@ -89,11 +88,13 @@ class Match(BaseModel):
         )
 
     def start(self) -> None:
-        """Transition from PENDING to RUNNING."""
+        """Transition from PENDING to RUNNING. Seed scores with home resources."""
         if self.status != MatchStatus.PENDING:
             raise MatchValidationExcept(
                 "Match can only be started from PENDING status.")
         self.status = MatchStatus.RUNNING
+        for civ in self.civilizations:
+            self.cumulative_scores[civ.name] = civ.home.resources
 
     def advance_round(self) -> None:
         """Advance to the next round."""
@@ -120,7 +121,7 @@ class Match(BaseModel):
 
 class Round(BaseModel):
     """Represents a round of the game"""
-    match_id: UUID | None = None
+    match: Match
     number: int
     skirmishes: list['Skirmish']
 
