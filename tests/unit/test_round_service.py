@@ -56,7 +56,7 @@ class TestRoundService(TestCase):
     def test_propagate_decision_sets_on_correct_side(self):
         """Verify decision is set on the correct civ_a or civ_b slot."""
         round = self.service.setup_round(self.match, [self.body_a])
-        self.service.propagate_decision(round, self.civ_1.id, Decision.COOPERATE)
+        self.service.propagate_decision(round, self.civ_1, Decision.COOPERATE)
 
         for s in round.skirmishes:
             if s.civ_a.id == self.civ_1.id:
@@ -67,7 +67,7 @@ class TestRoundService(TestCase):
     def test_propagate_decision_does_not_affect_other_civs(self):
         """Verify that propagating a decision does not touch other civilizations."""
         round = self.service.setup_round(self.match, [self.body_a])
-        self.service.propagate_decision(round, self.civ_1.id, Decision.DEFECT)
+        self.service.propagate_decision(round, self.civ_1, Decision.DEFECT)
 
         for s in round.skirmishes:
             if s.civ_a.id != self.civ_1.id:
@@ -79,7 +79,7 @@ class TestRoundService(TestCase):
         """Verify all skirmishes are resolved after resolve_round."""
         round = self.service.setup_round(self.match, [self.body_a])
         for civ in self.match.civilizations:
-            self.service.propagate_decision(round, civ.id, Decision.COOPERATE)
+            self.service.propagate_decision(round, civ, Decision.COOPERATE)
 
         self.service.resolve_round(round)
 
@@ -90,7 +90,7 @@ class TestRoundService(TestCase):
         """Verify resolve_round returns the same round object."""
         round = self.service.setup_round(self.match, [self.body_a])
         for civ in self.match.civilizations:
-            self.service.propagate_decision(round, civ.id, Decision.DEFECT)
+            self.service.propagate_decision(round, civ, Decision.DEFECT)
 
         result = self.service.resolve_round(round)
         assert result is round

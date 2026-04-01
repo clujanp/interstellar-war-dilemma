@@ -1,7 +1,6 @@
 from random import shuffle
-from uuid import UUID
 
-from app.domain.models import Match, Round, Skirmish, AstronomyBody
+from app.domain.models import Civilization, Match, Round, Skirmish, AstronomyBody
 from app.domain.value_objects import Decision
 
 
@@ -30,14 +29,14 @@ class RoundService:
         return Round(number=match.current_round, skirmishes=skirmishes)
 
     def propagate_decision(
-        self, round: Round, civilization_id: UUID, decision: Decision,
+        self, round: Round, civilization: Civilization, decision: Decision,
     ) -> None:
         """Set a civilization's decision on its skirmish in this round."""
         for skirmish in round.skirmishes:
-            if skirmish.civ_a.id == civilization_id:
+            if skirmish.civ_a.id == civilization.id:
                 skirmish.decision_a = decision
                 return
-            if skirmish.civ_b.id == civilization_id:
+            if skirmish.civ_b.id == civilization.id:
                 skirmish.decision_b = decision
                 return
 
