@@ -112,6 +112,7 @@ class Match(BaseModel):
 
 class Round(BaseModel):
     """Represents a round of the game"""
+    match_id: UUID | None = None
     number: int
     skirmishes: list['Skirmish']
 

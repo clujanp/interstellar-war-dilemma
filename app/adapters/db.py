@@ -32,6 +32,7 @@ class InMemoryRoundRepository(RoundRepository):
         self._store: dict[UUID, list[Round]] = {}
 
     def save(self, match_id: UUID, round: Round) -> None:
+        round.match_id = match_id
         self._store.setdefault(match_id, []).append(round)
 
     def get_by_match(self, match_id: UUID) -> list[Round]:
@@ -43,6 +44,10 @@ class InMemoryRoundRepository(RoundRepository):
                 return r
         raise KeyError(
             f"Round {round_number} not found for match '{match_id}'.")
+
+    def list(self) -> list[Round]:
+        """Return all rounds across all matches, in insertion order."""
+        return [r for rounds in self._store.values() for r in rounds]
 
 
 class InMemorySkirmishQueryRepository(SkirmishQueryRepository):
@@ -59,8 +64,7 @@ class InMemorySkirmishQueryRepository(SkirmishQueryRepository):
     ) -> list[Skirmish]:
         skirmishes = [
             skirmish
-            for rounds in self._round_repo._store.values()
-            for r in rounds
+            for r in self._round_repo.list()
             for skirmish in r.skirmishes
             if owner_id in (skirmish.civ_a.id, skirmish.civ_b.id) and (
                 opponent_id is None
