@@ -21,6 +21,14 @@ class BaseModel(PyDanticBaseModel):
         arbitrary_types_allowed=True,
     )
 
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, BaseModel):
+            return NotImplemented
+        return self.id == other.id
+
 
 class Galaxy(BaseModel):
     """Group of star systems"""
