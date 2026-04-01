@@ -1,14 +1,12 @@
 from .game_engine import GameEngine
-from .match_service import MatchService
-from .memories import Memories
+from .match_service import MatchSession
 from .memories_service import MemoriesService
-from .round_service import RoundService
+from .round_context import RoundContext
 
 
 __all__ = [
     "GameEngine",
-    "MatchService",
-    "RoundService",
-    "Memories",
+    "MatchSession",
+    "RoundContext",
     "MemoriesService",
 ]
