@@ -185,3 +185,6 @@ tmp/
 
 # development environment
 *.env
+
+# exclude uv.lock
+uv.lock
