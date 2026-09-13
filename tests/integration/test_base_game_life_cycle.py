@@ -5,6 +5,7 @@ from app.core.domain.models import AstroBody, Civilization, Skirmish
 from app.core.domain.value_objects import (
     AstroBodyProduction, AstroKind, CivilizationStatus, ColonizeCost,
     Decision, Efficiency, Resources, SkirmishStatus, SkirmishResult,)
+from app.core.domain.models.game_flow import Epoch
 
 
 class TestBaseGameLifeCycleIntegration(TestCase):
@@ -80,6 +81,7 @@ class TestBaseGameLifeCycleIntegration(TestCase):
             memory[civ] = memory.get(civ, 0) + 1
             if memory.get(civ, 0) >= threshold:
                 civs_to_kill.append(civ)
+                civ.status = CivilizationStatus.DEAD
         return civs_to_kill
 
     def test_init_astro_body_with_already_assigned_name(self):
@@ -204,9 +206,9 @@ class TestBaseGameLifeCycleIntegration(TestCase):
 
     def test_civ_life_cicle(self):
         """Test the life cycle of a civilization."""
-        civ_1 = Civilization(name="Republic", resources=Resources(5))
+        civ_1 = Civilization(name="Republic", resources=Resources(30))
         civ_2 = Civilization(name="Maverics", resources=Resources(1))
-        epochs = []
+        epochs: list[Epoch] = []
         memory_civs_falling: dict[Civilization, int] = {}
 
         # Epochs
@@ -218,30 +220,41 @@ class TestBaseGameLifeCycleIntegration(TestCase):
             [Decision.ATTACK, Decision.ATTACK],
             [Decision.COOPERATE, Decision.COOPERATE],
         ), self.astro_bodies):
-            all_skirmishes = [
-                skirmish for epoch in epochs
-                for skirmish in epoch["skirmishes"]
-            ]
-            self.apply_skirmish_production(all_skirmishes)
+            with self.subTest(epoch_index=epoch_index):
+                all_skirmishes = [
+                    skirmish for epoch in epochs
+                    for skirmish in epoch.skirmishes
+                ]
+                self.apply_skirmish_production(all_skirmishes)
 
-            # Kill a civ when the threshold of declining epochs is exceeded
-            civs_to_kill = self.dead_guard(
-                (civ_1, civ_2), memory_civs_falling, threshold=2)
-            if civs_to_kill:
-                # Manage a civ to kill
-                break
+                # Kill a civ when the threshold of declining epochs is exceeded
+                civs_to_kill = self.dead_guard(
+                    (civ_1, civ_2), memory_civs_falling, threshold=2)
+                if civs_to_kill:
+                    # Manage a civ to kill
+                    break
 
-            # Paid colonization cost
-            self.pay_colonize_cost([civ_1, civ_2], astro_body)
+                # Paid colonization cost
+                self.pay_colonize_cost([civ_1, civ_2], astro_body)
 
-            epochs.append({
-                "index": epoch_index,
-                "civilizations": (civ_1, civ_2),
-                "skirmishes": [
-                    (skirmish := Skirmish(
-                        civilizations=(civ_1, civ_2), astro_body=astro_body)),
-                ],
-            })
-            self.set_decisions_in_skirmish(civ_1, skirmish, desicions[0])
-            self.set_decisions_in_skirmish(civ_2, skirmish, desicions[1])
-            skirmish.resolve()
+                epochs.append(Epoch(
+                    index=epoch_index,
+                    civilizations=(civ_1, civ_2),
+                    skirmishes=[
+                        (skirmish := Skirmish(
+                            civilizations=(civ_1, civ_2),
+                            astro_body=astro_body
+                        )),
+                    ],
+                ))
+                self.set_decisions_in_skirmish(civ_1, skirmish, desicions[0])
+                self.set_decisions_in_skirmish(civ_2, skirmish, desicions[1])
+                skirmish.resolve()
+        else:
+            raise RuntimeError("No civilization was killed during the epochs.")
+
+        assert civ_2.status == CivilizationStatus.DEAD
+        assert civ_2.resources <= Resources(0)
+        assert civ_1.status == CivilizationStatus.ALIVE
+        assert civ_1.resources > Resources(5)
+        assert len(epochs) < 5
