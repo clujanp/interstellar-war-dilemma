@@ -1,7 +1,7 @@
 from random import choice
 from pydantic import ConfigDict, model_validator
-from ..base_model import CustomBaseModel
-from .value_objects import (
+from ...base_model import CustomBaseModel
+from ..value_objects import (
     CivilizationStatus, AstroKind, AstroBodyStatus, Efficiency, Resources,
     ColonizeCost, AstroBodyProduction, SkirmishResult, SkirmishStatus,
     Decision)
