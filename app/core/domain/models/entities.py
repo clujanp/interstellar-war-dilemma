@@ -54,7 +54,8 @@ class Skirmish(CustomBaseModel):
     astro_body: AstroBody
     decisions: list[Decision, Decision] = [Decision.NONE, Decision.NONE]
     result: None | SkirmishResult = None
-    production_participation: None | tuple[Efficiency, Efficiency] = None
+    production_participation: tuple[Efficiency, Efficiency] = (
+        Efficiency.NONE, Efficiency.NONE)
     status: SkirmishStatus = SkirmishStatus.ONGOING
 
     def resolve(self) -> SkirmishResult:
@@ -71,7 +72,7 @@ class Skirmish(CustomBaseModel):
 
     def _resolve_prodcution_parts(self) -> tuple[Efficiency, Efficiency]:
         """Resolve the production participation for each civilization."""
-        if self.production_participation is not None:
+        if self.status == SkirmishStatus.FINISHED:
             return self.production_participation
 
         self.production_participation = {

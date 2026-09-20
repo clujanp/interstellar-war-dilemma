@@ -2,8 +2,8 @@ from random import choice
 from unittest import TestCase
 from app.core.domain.models import AstroBody, Civilization, Skirmish
 from app.core.domain.value_objects import (
-    AstroBodyProduction, AstroKind, ColonizeCost, Decision, Resources,
-    SkirmishStatus,)
+    AstroBodyProduction, AstroKind, ColonizeCost, Decision, Efficiency,
+    Resources, SkirmishStatus,)
 
 
 class TestInitSkirmish(TestCase):
@@ -31,5 +31,6 @@ class TestInitSkirmish(TestCase):
         assert skirmish.astro_body == self.astro_bodies[0]
         assert skirmish.decisions == [Decision.NONE, Decision.NONE]
         assert skirmish.result is None
-        assert skirmish.production_participation is None
+        assert skirmish.production_participation == (
+            Efficiency.NONE, Efficiency.NONE)
         assert skirmish.status == SkirmishStatus.ONGOING
