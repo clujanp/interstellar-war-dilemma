@@ -13,7 +13,7 @@ class StrategiesRepo(IStrategiesRepo):
             tuple[URIAppHttps, str], IStrategy
         ] = OrderedDict()
 
-    def register_strategy(
+    def register(
         self, callback_uri: URIAppHttps, name: str
     ) -> IStrategy:
         """Registers a strategy using the provided callback URI."""
@@ -30,21 +30,21 @@ class StrategiesRepo(IStrategiesRepo):
         self.__strategies[(callback_uri, name)] = strategy
         return strategy
 
-    def unregister_strategy(
+    def unregister(
         self, callback_uri: URIAppHttps, name: str
     ) -> None:
         """Unregisters a strategy using the provided callback URI."""
         self.__strategies.pop((callback_uri, name), None)
 
-    def get_strategy(
+    def get(
         self, callback_uri: URIAppHttps, name: str
     ) -> IStrategy | None:
         """Retrieves a strategy by its callback URI."""
         return self.__strategies.get((callback_uri, name))
 
-    def list_strategies(self) -> dict[tuple[URIAppHttps, str], IStrategy]:
+    def list(self) -> list[IStrategy]:
         """Lists all registered strategies."""
-        return dict(self.__strategies)
+        return list(self.__strategies.values())
 
     def _check_registration(
         self, callback_uri: URIAppHttps, name: str, is_remote: bool

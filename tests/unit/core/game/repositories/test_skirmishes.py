@@ -12,6 +12,7 @@ from app.core.game.repositories.interfaces import ISkirmishesRepo
 
 class TestSkirmishesRepo(TestCase):
     """Test suite for the SkirmishesRepo class."""
+
     def setUp(self):
         self.players = [CivilizationRegistration(
             name=f"Player{i}",
@@ -36,8 +37,7 @@ class TestSkirmishesRepo(TestCase):
                 decisions=[Decision.ATTACK, Decision.COOPERATE],
             )).resolve()
             for player in players:
-                self.skirmishes.append(
-                    SkirmishRelated(owner=player, skirmish=skirmish))
+                self.skirmishes.append(SkirmishRelated(owner=player, skirmish=skirmish))
 
     def test_interface(self):
         """Test that SkirmishesRepo has the correct interface."""
@@ -49,11 +49,11 @@ class TestSkirmishesRepo(TestCase):
         # pylint: disable=protected-access
         assert repo._SkirmishesRepo__skirmishes == OrderedDict()
 
-    def test_record_skirmish(self):
+    def test_record(self):
         """Test that a skirmish can be recorded in the repository."""
         repo = SkirmishesRepo()
         for skirmish in self.skirmishes:
-            repo.record_skirmish(skirmish)
+            repo.record(skirmish)
         # pylint: disable=protected-access
         assert len(repo._SkirmishesRepo__skirmishes) == 3  # 3 players
         assert len([  # 9 planets/skirmishes x 2 owners = 18 skirmishes related
@@ -62,25 +62,35 @@ class TestSkirmishesRepo(TestCase):
             for skirmish in skirmish_list
         ]) == 18
         assert repo._SkirmishesRepo__skirmishes[self.players[0]] == [
-            skirmish for skirmish in self.skirmishes
+            skirmish
+            for skirmish in self.skirmishes
             if skirmish.owner == self.players[0]
         ]
 
-    def test_record_skirmish_type_error(self):
+    def test_record_type_error(self):
         """Test that recording a non-SkirmishRelated raises a TypeError."""
         repo = SkirmishesRepo()
         with self.assertRaises(TypeError) as error:
-            repo.record_skirmish("not a skirmish related instance")
+            repo.record("not a skirmish related instance")
         assert str(error.exception) == "Expected a SkirmishRelated instance."
 
-    def test_query_skirmishes(self):
+    def test_list(self):
+        """Test that all recorded skirmishes can be listed."""
+        repo = SkirmishesRepo()
+        for skirmish in self.skirmishes:
+            repo.record(skirmish)
+        all_skirmishes = repo.list()
+        assert len(all_skirmishes) == 18
+        assert set(all_skirmishes) == set(self.skirmishes)
+
+    def test_query(self):
         """Test that skirmishes can be queried from the repository."""
         repo = SkirmishesRepo()
         for skirmish in self.skirmishes:
-            repo.record_skirmish(skirmish)
+            repo.record(skirmish)
 
         for player in self.players:
-            assert len(repo.query_skirmishes(owner=player)) == 6
+            assert len(repo.query(owner=player)) == 6
 
         assert all([
             skirmish.owner == self.players[0]
@@ -88,21 +98,28 @@ class TestSkirmishesRepo(TestCase):
             and skirmish.opponent_decision == Decision.COOPERATE
             and skirmish.result == SkirmishResult.TREASON_A
             and skirmish.gain_factor == float(Efficiency.TREASON)
-            for skirmish in repo.query_skirmishes(owner=self.players[0])
+            for skirmish in repo.query(owner=self.players[0])
         ])
 
-    def test_query_skirmishes_with_filters(self):
+    def test_query_with_filters(self):
         """Test that skirmishes can be queried with specific filters."""
         repo = SkirmishesRepo()
         for skirmish in self.skirmishes:
-            repo.record_skirmish(skirmish)
+            repo.record(skirmish)
 
-        filtered_skirmishes = repo.query_skirmishes(
-            owner=self.players[0],
-            opponent="Player2"
-        )
+        filtered_skirmishes = repo.query(
+            owner=self.players[0], opponent="Player2")
 
         assert len(filtered_skirmishes) == 3
         assert all([
-            skirmish.opponent == "Player2" for skirmish in filtered_skirmishes
-        ])
+            skirmish.opponent == "Player2" for skirmish in filtered_skirmishes])
+
+    def test_get_all_astro_bodies(self):
+        """Test that all astro involved in skirmishes can be retrieved."""
+        repo = SkirmishesRepo()
+        for skirmish in self.skirmishes:
+            repo.record(skirmish)
+        all_astro_bodies = repo.get_all_astro_bodies()
+        expected_astro_bodies = set(
+            skirmish.skirmish.astro_body for skirmish in self.skirmishes)
+        assert all_astro_bodies == expected_astro_bodies

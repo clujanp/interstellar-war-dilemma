@@ -64,6 +64,16 @@ class StrategyLocal(IStrategy):
         cls.__registered_strategies[path] = func
         return func
 
+    @classmethod
+    def unregister(cls, func: StrategyCallable) -> None:
+        cls._check_function(func)
+        if not any([
+            func == strategies
+            for strategies in cls.__registered_strategies.values()
+        ]):
+            raise ValueError(f"Function '{func.__name__}' not is registered.")
+        cls.__registered_strategies.pop(f"app://{func.__name__}")
+
     @staticmethod
     def _check_function(func: StrategyCallable) -> None:
         """Check function signature matches the expected strategy signature."""

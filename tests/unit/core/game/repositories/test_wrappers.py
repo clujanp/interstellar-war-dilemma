@@ -1,4 +1,5 @@
 # pylint: disable=unused-argument
+# pylint: disable=protected-access
 import json
 from inspect import signature
 from unittest import TestCase
@@ -18,8 +19,7 @@ class TestStrategyRemote(TestCase):
         self.callback_uri = "http://michi.com/war"
         self.scenario = dict(
             opponent="Player2",
-            astro=AstroBodyDTO(
-                name="Earth", kind="planet", cost=10, production=5),
+            astro=AstroBodyDTO(name="Earth", kind="planet", cost=10, production=5),
             resources=100.0,
         )
 
@@ -37,24 +37,25 @@ class TestStrategyRemote(TestCase):
     def test_request(self):
         """Test that StrategyRemote can make a request."""
         remote_strategy = StrategyRemote(callback_uri=self.callback_uri)
-        responses.post(
-            self.callback_uri, status=200, json={"decision": "ATTACK"})
+        responses.post(self.callback_uri, status=200, json={"decision": "ATTACK"})
 
         decision = remote_strategy(**self.scenario)
 
         assert decision == Decision.ATTACK
         assert responses.calls[0].request.url == self.callback_uri
         assert responses.calls[0].request.method == "POST"
-        assert responses.calls[0].request.body.decode("utf-8") == json.dumps({
-            "opponent": "Player2",
-            "astro": {
-                "name": "Earth",
-                "kind": "planet",
-                "cost": 10.0,
-                "production": 5.0
-            },
-            "resources": 100.0
-        })
+        assert responses.calls[0].request.body.decode("utf-8") == json.dumps(
+            {
+                "opponent": "Player2",
+                "astro": {
+                    "name": "Earth",
+                    "kind": "planet",
+                    "cost": 10.0,
+                    "production": 5.0,
+                },
+                "resources": 100.0,
+            }
+        )
 
     @responses.activate
     def test_request_timeout(self):
@@ -76,8 +77,7 @@ class TestStrategyLocal(TestCase):
         """Set up test fixtures."""
         self.scenario = dict(
             opponent="Player2",
-            astro=AstroBodyDTO(
-                name="Earth", kind="planet", cost=10, production=5),
+            astro=AstroBodyDTO(name="Earth", kind="planet", cost=10, production=5),
             resources=100.0,
         )
 
@@ -101,6 +101,7 @@ class TestStrategyLocal(TestCase):
 
     def test_register(self):
         """Test that a local strategy can be registered."""
+
         @StrategyLocal.register
         def all_out_attack(
             opponent: str, astro: AstroBodyDTO, resources: float
@@ -109,7 +110,6 @@ class TestStrategyLocal(TestCase):
 
         assert (
             "app://all_out_attack"
-            # pylint: disable=protected-access
             in StrategyLocal._StrategyLocal__registered_strategies
         )
 
@@ -118,29 +118,63 @@ class TestStrategyLocal(TestCase):
         with self.subTest("must be callable"):
             with self.assertRaises(ValueError) as error:
                 StrategyLocal.register("not callable")
-            assert str(error.exception) == (
-                "Function 'not callable' must be callable")
+            assert str(error.exception) == ("Function 'not callable' must be callable")
 
         with self.subTest("must have correct arguments"):
+
             def bad_arguments(opponent: str) -> Decision:
                 return Decision.ATTACK
 
             with self.assertRaises(ValueError) as error:
                 StrategyLocal.register(bad_arguments)
-            assert "Function bad_arguments must have parameters" in str(
-                error.exception)
+            assert "Function bad_arguments must have parameters" in str(error.exception)
 
         with self.subTest("must have correct return annotation"):
-            def bad_return(
-                opponent: str, astro: AstroBodyDTO, resources: float
-            ) -> str:
+
+            def bad_return(opponent: str, astro: AstroBodyDTO, resources: float) -> str:
                 return "not a Decision"
 
             with self.assertRaises(ValueError) as error:
                 StrategyLocal.register(bad_return)
-            assert (
-                "Function bad_return must have return annotation like"
-            ) in str(error.exception)
+            assert ("Function bad_return must have return annotation like") in str(
+                error.exception
+            )
+
+    def test_unregister(self):
+        """Test when already register function is unregister"""
+
+        @StrategyLocal.register
+        def test_strategy(
+            opponent: str, astro: AstroBodyDTO, resources: float
+        ) -> Decision:
+            return Decision.ATTACK
+
+        assert (
+            "app://test_strategy" in StrategyLocal._StrategyLocal__registered_strategies
+        )
+        StrategyLocal.unregister(test_strategy)
+        assert (
+            "app://test_strategy"
+            not in StrategyLocal._StrategyLocal__registered_strategies
+        )
+
+    def test_unregister_non_register(self):
+        """Test when not register function try to unregister"""
+
+        def not_regitered(
+            opponent: str, astro: AstroBodyDTO, resources: float
+        ) -> Decision:
+            return Decision.ATTACK
+
+        with self.assertRaises(ValueError) as error:
+            StrategyLocal.unregister(not_regitered)
+        assert str(error.exception) == ("Function 'not_regitered' not is registered.")
+
+    def test_unregister_non_strategy(self):
+        """Test when not strategy function try to unregister"""
+        with self.assertRaises(ValueError) as error:
+            StrategyLocal.unregister("not_regitered")
+        assert str(error.exception) == ("Function 'not_regitered' must be callable")
 
     def test_initialization(self):
         """Test that StrategyLocal can be initialized."""
@@ -149,13 +183,9 @@ class TestStrategyLocal(TestCase):
 
         choice_strategy = StrategyLocal(callback_uri="app://all_out_attack")
 
-        assert (
-            signature(choice_strategy)
-            == signature(self.strategy_all_out_attack)
-        )
-        assert (
-            choice_strategy(**self.scenario)
-            == self.strategy_all_out_attack(**self.scenario)
+        assert signature(choice_strategy) == signature(self.strategy_all_out_attack)
+        assert choice_strategy(**self.scenario) == self.strategy_all_out_attack(
+            **self.scenario
         )
         assert choice_strategy(**self.scenario) == Decision.ATTACK
 
@@ -177,10 +207,10 @@ class TestStrategyLocal(TestCase):
 
     def test_call_bad_strategy_return_none_decision(self):
         """Test calling a strategy with bad return results in Decision.NONE."""
+
         def bad_strategy(
             opponent: str, astro: AstroBodyDTO, resources: float
-        ) -> Decision:
-            ...
+        ) -> Decision: ...
 
         StrategyLocal.register(bad_strategy)
         choice_strategy = StrategyLocal(callback_uri="app://bad_strategy")

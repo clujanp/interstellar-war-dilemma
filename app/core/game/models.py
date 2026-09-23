@@ -1,4 +1,5 @@
-from pydantic import BaseModel, model_validator
+from pydantic import model_validator
+from ..base_model import CustomBaseModel
 from ..domain.models import Civilization, Skirmish
 from ..domain.value_objects import Decision, SkirmishResult
 from .dto import AstroBodyDTO
@@ -15,7 +16,7 @@ class CivilizationRegistration(Civilization):
         return self
 
 
-class SkirmishRelated(BaseModel):
+class SkirmishRelated(CustomBaseModel):
     owner: CivilizationRegistration
     skirmish: Skirmish
 
@@ -46,6 +47,10 @@ class SkirmishRelated(BaseModel):
     @property
     def astro(self) -> AstroBodyDTO:
         return self._astro
+
+    @property
+    def resources(self) -> float:
+        return float(self.owner.resources)
 
     @property
     def decision(self) -> Decision:
