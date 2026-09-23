@@ -14,14 +14,12 @@ class TestBaseGameLifeCycleIntegration(TestCase):
     def setUp(self):
         self.civ_a = Civilization(name="Civ A", resources=Resources(10))
         self.civ_b = Civilization(name="Civ B", resources=Resources(10))
-        self.astro_bodies = [
-            AstroBody(
-                name=AstroBody.name_generator(),
-                kind=choice(list(AstroKind)),
-                colonize_cost=choice(list(ColonizeCost)),
-                production=choice(list(AstroBodyProduction)),
-            ) for _ in range(5)
-        ]
+        self.astro_bodies = [AstroBody(
+            name=AstroBody.name_generator(),
+            kind=choice(list(AstroKind)),
+            colonize_cost=choice(list(ColonizeCost)),
+            production=choice(list(AstroBodyProduction)),
+        ) for _ in range(5)]
 
     # Logic helpers
 
